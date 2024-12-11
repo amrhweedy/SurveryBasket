@@ -1,0 +1,99 @@
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# User-specific folders
+.vscode/
+.vs/
+.idea/
+
+# Logs
+*.log
+*.tlog
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]rm/
+[Aa]rm64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+BuildArtifacts/
+
+# Visual Studio auto-generated files
+*.ncb
+*.aps
+*.opendb
+*.opensdf
+*.sdf
+*.tmp
+*.cache
+*.ilk
+*.idb
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.iobj
+
+# Visual Studio Code-specific
+.vscode/
+
+# Installer output
+[Ii]nstaller/
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.coverage
+*.coveragexml
+*.trx
+_TestResults/
+
+# Include folder from ASP.NET MVC
+!wwwroot/**
+
+# Avoid ignoring files in NuGet packages folder
+!packages/build/
+!packages/repositories.config
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# VS Code specific files
+.vscode/
+
+# Mac system files
+.DS_Store
+
+# Backup files
+*~
+*.bak
+*.swp
+
+# Project-specific
+.project
+.idea/
+*.pyc
+*.db
+
+# JetBrains Rider files
+.idea/
+
+# Resharper files
+_ReSharper*/
+*.DotSettings.user
