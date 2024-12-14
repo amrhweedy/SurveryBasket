@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SurveyBasket.Api.Contracts.Requests;
-using SurveyBasket.Api.Mapping;
-using SurveyBasket.Api.Services;
+﻿
 
 namespace SurveyBasket.Api.Controllers;
 [Route("api/[controller]")]
