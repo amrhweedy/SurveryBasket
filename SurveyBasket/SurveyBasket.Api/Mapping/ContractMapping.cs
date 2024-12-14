@@ -1,19 +1,12 @@
-﻿using SurveyBasket.Api.Contracts.Requests;
-using SurveyBasket.Api.Contracts.Responses;
+﻿namespace SurveyBasket.Api.Mapping;
 
-namespace SurveyBasket.Api.Mapping;
 
+// manual mapping using extensions methods
 public static class ContractMapping
 {
     public static PollResponse MapToPollResponse(this Poll poll)
     {
-        return new()
-        {
-            Id = poll.Id,
-            Title = poll.Title,
-            Description = poll.Description,
-
-        };
+        return new PollResponse(poll.Id, poll.Title, poll.Description);
     }
 
     public static IEnumerable<PollResponse> MapToPollResponse(this IEnumerable<Poll> polls)
@@ -30,6 +23,5 @@ public static class ContractMapping
             Description = request.Description
         };
     }
-
 
 }
