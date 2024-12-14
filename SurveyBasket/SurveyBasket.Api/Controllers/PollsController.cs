@@ -21,7 +21,7 @@ public class PollsController(IPollService pollService) : ControllerBase
         if (poll is null)
             return NotFound();
 
-        PollResponse response = poll;
+        PollResponse response = (PollResponse)poll;
 
         return Ok(response);
 
@@ -30,7 +30,7 @@ public class PollsController(IPollService pollService) : ControllerBase
     [HttpPost]
     public IActionResult Add([FromBody] CreatePollRequest request)
     {
-        var newPoll = _pollService.Add(request);
+        var newPoll = _pollService.Add((Poll)request);
 
         return CreatedAtAction(nameof(Get), new { id = newPoll.Id }, newPoll);
 
@@ -46,7 +46,7 @@ public class PollsController(IPollService pollService) : ControllerBase
     [HttpPut("{id}")]
     public IActionResult Update([FromRoute] int id, [FromBody] CreatePollRequest request)
     {
-        var isUpdated = _pollService.Update(id, request);
+        var isUpdated = _pollService.Update(id, (Poll)request);
         if (!isUpdated)
             return NotFound();
 
