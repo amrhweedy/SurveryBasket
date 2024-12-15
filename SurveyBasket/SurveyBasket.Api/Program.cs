@@ -1,3 +1,6 @@
+using MapsterMapper;
+using System.Reflection;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -8,6 +11,11 @@ builder.Services.AddSwaggerGen();
 
 
 builder.Services.AddScoped<IPollService, PollService>();
+
+// Mapster
+var mappingConfig = TypeAdapterConfig.GlobalSettings;
+mappingConfig.Scan(Assembly.GetExecutingAssembly());
+builder.Services.AddSingleton<IMapper>(new Mapper(mappingConfig));
 
 
 var app = builder.Build();
