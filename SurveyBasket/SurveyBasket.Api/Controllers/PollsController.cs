@@ -11,7 +11,8 @@ public class PollsController(IPollService pollService) : ControllerBase
     public IActionResult GetAll()
     {
         var polls = _pollService.GetAll();
-        return Ok(polls);
+        var response = polls.Adapt<IEnumerable<PollResponse>>();
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
@@ -31,11 +32,10 @@ public class PollsController(IPollService pollService) : ControllerBase
     [HttpPost]
     public IActionResult Add([FromBody] CreatePollRequest request)
     {
-        //var newPoll = _pollService.Add((Poll)request);
+        var newPoll = _pollService.Add(request.Adapt<Poll>());
 
-        //return CreatedAtAction(nameof(Get), new { id = newPoll.Id }, newPoll);
+        return CreatedAtAction(nameof(Get), new { id = newPoll.Id }, newPoll);  // 201
 
-        return Ok();
 
         // one of the rest guidelines says that when you create a new resource in the server the client must know how can access this resource 
         // so if return ok() the client can't know where the new resource is located
@@ -49,11 +49,11 @@ public class PollsController(IPollService pollService) : ControllerBase
     [HttpPut("{id}")]
     public IActionResult Update([FromRoute] int id, [FromBody] CreatePollRequest request)
     {
-        //var isUpdated = _pollService.Update(id, (Poll)request);
-        //if (!isUpdated)
-        //    return NotFound();
+        var isUpdated = _pollService.Update(id, request.Adapt<Poll>());
+        if (!isUpdated)
+            return NotFound();
 
-        return NoContent();
+        return NoContent();  //204
 
     }
 
