@@ -26,4 +26,12 @@ public class StudentController : ControllerBase
         return Ok(studentResponse);
     }
 
+
+
+    [HttpPost]
+    public IActionResult Post([FromBody] Student student)
+    {
+        return Ok(student);
+    }
+
 }
