@@ -8,7 +8,7 @@ public class Student
     public string MiddleName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
 
-    [MinAge(18), Display(Name = "Date of Birth")]
+    //[MinAge(18), Display(Name = "Date of Birth")]
     public DateTime? DateOfBirth { get; set; }
     public Department Department { get; set; } = default!;
 }
