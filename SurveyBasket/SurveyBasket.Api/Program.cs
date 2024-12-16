@@ -1,22 +1,7 @@
-using MapsterMapper;
-using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-builder.Services.AddControllers();//registers all controllers in the application. It identifies controllers either by naming convention (any class ending with Controller) or by using the [ApiController] attribute (or [Controller] attribute for MVC controllers).
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-
-builder.Services.AddScoped<IPollService, PollService>();
-
-// Mapster
-var mappingConfig = TypeAdapterConfig.GlobalSettings;
-mappingConfig.Scan(Assembly.GetExecutingAssembly());
-builder.Services.AddSingleton<IMapper>(new Mapper(mappingConfig));
-
+builder.Services.AddDependencies();
 
 var app = builder.Build();
 
