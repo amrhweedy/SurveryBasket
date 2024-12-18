@@ -1,5 +1,5 @@
 ﻿
-namespace SurveyBasket.Api.Models;
+namespace SurveyBasket.Api.Entities;
 
 public class Student
 {

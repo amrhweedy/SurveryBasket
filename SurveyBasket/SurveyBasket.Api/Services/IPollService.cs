@@ -3,9 +3,10 @@ namespace SurveyBasket.Api.Services;
 
 public interface IPollService
 {
-    IEnumerable<Poll> GetAll();
-    Poll? Get(int Id);
-    Poll Add(Poll poll);
-    bool Update(int Id, Poll poll);
-    bool Delete(int Id);
+    Task<IEnumerable<Poll>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<Poll?> GetAsync(int Id, CancellationToken cancellationToken = default);
+    Task<Poll> AddAsync(Poll poll, CancellationToken cancellationToken = default);
+    Task<bool> UpdateAsync(int Id, Poll poll, CancellationToken cancellationToken = default);
+    Task<bool> DeleteAsync(int Id, CancellationToken cancellationToken = default);
+    Task<bool> TogglePublishStatusAsync(int Id, CancellationToken cancellationToken = default);
 }
