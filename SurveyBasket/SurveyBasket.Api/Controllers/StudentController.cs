@@ -1,4 +1,6 @@
-﻿namespace SurveyBasket.Api.Controllers;
+﻿using SurveyBasket.Api.Contracts.Students;
+
+namespace SurveyBasket.Api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 public class StudentController : ControllerBase

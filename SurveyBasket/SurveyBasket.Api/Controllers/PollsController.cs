@@ -1,4 +1,8 @@
-﻿namespace SurveyBasket.Api.Controllers;
+﻿using Microsoft.AspNetCore.Authorization;
+using SurveyBasket.Api.Contracts.Polls;
+using SurveyBasket.Api.Services.Polls;
+
+namespace SurveyBasket.Api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 public class PollsController(IPollService pollService) : ControllerBase
@@ -7,6 +11,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 
 
     [HttpGet]
+    [Authorize]  // it means that the user must be authenticated (have a valid token) to access this endpoint
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var polls = await _pollService.GetAllAsync(cancellationToken);

@@ -1,4 +1,4 @@
-﻿namespace SurveyBasket.Api.Contracts.Responses;
+﻿namespace SurveyBasket.Api.Contracts.Students;
 
 public class StudentResponse
 {
