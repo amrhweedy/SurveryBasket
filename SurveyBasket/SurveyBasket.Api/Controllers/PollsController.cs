@@ -5,13 +5,14 @@ using SurveyBasket.Api.Services.Polls;
 namespace SurveyBasket.Api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]  // it means that the user must be authenticated (have a valid token) to access any endpoint in this controller
+
 public class PollsController(IPollService pollService) : ControllerBase
 {
     private readonly IPollService _pollService = pollService;
 
 
     [HttpGet]
-    [Authorize]  // it means that the user must be authenticated (have a valid token) to access this endpoint
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var polls = await _pollService.GetAllAsync(cancellationToken);
@@ -38,7 +39,7 @@ public class PollsController(IPollService pollService) : ControllerBase
     {
         var newPoll = await _pollService.AddAsync(request.Adapt<Poll>(), cancellationToken);
 
-        return CreatedAtAction(nameof(Get), new { id = newPoll.Id }, newPoll);  // 201
+        return CreatedAtAction(nameof(Get), new { id = newPoll.Id }, newPoll.Adapt<PollResponse>());  // 201
 
 
         // one of the rest guidelines says that when you create a new resource in the server the client must know how can access this resource 
