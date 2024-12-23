@@ -1,5 +1,4 @@
-﻿using SurveyBasket.Api.Abstractions;
-using SurveyBasket.Api.Authentication;
+﻿using SurveyBasket.Api.Authentication;
 using SurveyBasket.Api.Contracts.Authentication;
 using SurveyBasket.Api.Errors;
 using System.Security.Cryptography;
@@ -24,7 +23,7 @@ public class AuthService(UserManager<ApplicationUser> userManager, IJwtProvider 
 
         var isValidPassword = await _userManager.CheckPasswordAsync(user, Password);
         if (!isValidPassword)
-            return Result.Failure<AuthResponse>( UserErrors.InvalidCredentials);
+            return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
         // generate jwt token
 
@@ -45,7 +44,7 @@ public class AuthService(UserManager<ApplicationUser> userManager, IJwtProvider 
 
         // return AuthResponse
 
-        var response =new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn * 60, refreshToken, refreshTokenExpiration);
+        var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn * 60, refreshToken, refreshTokenExpiration);
 
         return Result.Success<AuthResponse>(response);
 
@@ -57,15 +56,15 @@ public class AuthService(UserManager<ApplicationUser> userManager, IJwtProvider 
         var userId = _jwtProvider.ValidateToken(Token);
 
         if (userId is null)
-            return Result.Failure<AuthResponse>(UserErrors.InvalidToken);
+            return Result.Failure<AuthResponse>(UserErrors.InvalidJwtToken);
 
         var user = await _userManager.FindByIdAsync(userId);
         if (user is null)
-            return null;
+            return Result.Failure<AuthResponse>(UserErrors.InvalidJwtToken);
 
         var userRefreshToken = user.RefreshTokens.SingleOrDefault(x => x.Token == RefreshToken && x.IsActive);
         if (userRefreshToken is null)
-            return null;
+            return Result.Failure<AuthResponse>(UserErrors.InvalidRefreshToken);
 
 
         userRefreshToken.RevokedOn = DateTime.UtcNow; // Revoke the old refresh token because the refresh token is used once time only 
@@ -90,32 +89,32 @@ public class AuthService(UserManager<ApplicationUser> userManager, IJwtProvider 
 
         // return AuthResponse
 
-        return new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, newToken, expiresIn * 60, newRefreshToken, refreshTokenExpiration);
+        var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, newToken, expiresIn * 60, newRefreshToken, refreshTokenExpiration);
 
-
+        return Result.Success<AuthResponse>(response);
     }
 
-    public async Task<bool> RevokeTokenAsync(string Token, string RefreshToken, CancellationToken cancellationToken = default)
+    public async Task<Result> RevokeTokenAsync(string Token, string RefreshToken, CancellationToken cancellationToken = default)
     {
         var userId = _jwtProvider.ValidateToken(Token);
 
         if (userId is null)
-            return false;
+            return Result.Failure(UserErrors.InvalidJwtToken);
 
         var user = await _userManager.FindByIdAsync(userId);
         if (user is null)
-            return false;
+            return Result.Failure(UserErrors.InvalidJwtToken);
 
         var userRefreshToken = user.RefreshTokens.SingleOrDefault(x => x.Token == RefreshToken && x.IsActive);
         if (userRefreshToken is null)
-            return false;
+            return Result.Failure(UserErrors.InvalidRefreshToken);
 
 
         userRefreshToken.RevokedOn = DateTime.UtcNow;
 
         await _userManager.UpdateAsync(user);
 
-        return true;
+        return Result.Success();
     }
 
 
