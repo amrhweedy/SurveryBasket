@@ -1,5 +1,7 @@
-﻿using SurveyBasket.Api.Authentication;
+﻿using SurveyBasket.Api.Abstractions;
+using SurveyBasket.Api.Authentication;
 using SurveyBasket.Api.Contracts.Authentication;
+using SurveyBasket.Api.Errors;
 using System.Security.Cryptography;
 
 namespace SurveyBasket.Api.Services.Authentication;
@@ -11,20 +13,18 @@ public class AuthService(UserManager<ApplicationUser> userManager, IJwtProvider 
 
     private readonly int _RefreshTokenExpirationInDays = 14;
 
-
-
-    public async Task<AuthResponse?> GetTokenAsync(string Email, string Password, CancellationToken cancellationToken = default)
+    public async Task<Result<AuthResponse>> GetTokenAsync(string Email, string Password, CancellationToken cancellationToken = default)
     {
         // get user
         var user = await _userManager.FindByEmailAsync(Email);
         if (user is null)
-            return null;
+            return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
         // check password
 
         var isValidPassword = await _userManager.CheckPasswordAsync(user, Password);
         if (!isValidPassword)
-            return null;
+            return Result.Failure<AuthResponse>( UserErrors.InvalidCredentials);
 
         // generate jwt token
 
@@ -45,18 +45,19 @@ public class AuthService(UserManager<ApplicationUser> userManager, IJwtProvider 
 
         // return AuthResponse
 
-        return new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn * 60, refreshToken, refreshTokenExpiration);
+        var response =new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn * 60, refreshToken, refreshTokenExpiration);
 
+        return Result.Success<AuthResponse>(response);
 
     }
 
 
-    public async Task<AuthResponse?> GetRefreshTokenAsync(string Token, string RefreshToken, CancellationToken cancellationToken = default)
+    public async Task<Result<AuthResponse>> GetRefreshTokenAsync(string Token, string RefreshToken, CancellationToken cancellationToken = default)
     {
         var userId = _jwtProvider.ValidateToken(Token);
 
         if (userId is null)
-            return null;
+            return Result.Failure<AuthResponse>(UserErrors.InvalidToken);
 
         var user = await _userManager.FindByIdAsync(userId);
         if (user is null)

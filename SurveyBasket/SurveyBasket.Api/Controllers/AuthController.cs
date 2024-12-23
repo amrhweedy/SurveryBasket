@@ -21,7 +21,9 @@ public class AuthController(IAuthService authService,
     {
         var authResult = await _authService.GetTokenAsync(request.Email, request.Password, cancellationToken);
 
-        return authResult is null ? BadRequest("invalid email or password") : Ok(authResult);
+        return authResult.IsSuccess 
+           ? Ok(authResult.Value) 
+            :Problem(statusCode: StatusCodes.Status400BadRequest, title: authResult.Error.Code, detail: authResult.Error.Description);
     }
 
 
