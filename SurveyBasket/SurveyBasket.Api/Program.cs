@@ -16,6 +16,10 @@ if (app.Environment.IsDevelopment())  // it knows that we are in development mod
 
 app.UseHttpsRedirection();  // to redirect http to https, it means if i use http it will redirect to https
 
+
+app.UseCors("MyPolicy");  // it must come before the authentication 
+
+
 app.UseAuthorization();
 
 app.MapControllers(); //scans all controllers in the application and collects the routes defined in those controllers. When a request is sent, the routing system will match the request URL to one of the collected routes, and then direct the request to the appropriate controller and action that handles that route.

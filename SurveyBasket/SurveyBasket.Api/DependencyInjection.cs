@@ -17,6 +17,24 @@ public static class DependencyInjection
 
         services.AddControllers(); //registers all controllers in the application. It identifies controllers either by naming convention (any class ending with Controller) or by using the [ApiController] attribute (or [Controller] attribute for MVC controllers).
 
+        // Cors
+
+        string[] allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>()!;
+
+        services.AddCors(options =>
+        {
+            options.AddPolicy("MyPolicy", builder =>
+            {
+                builder
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .WithOrigins(allowedOrigins);
+            });
+        });
+
+
+
+
 
         var connectionString = configuration.GetConnectionString("DefaultConnection") ??
             throw new InvalidOperationException("connection string 'DefaultConnection' not found.");
