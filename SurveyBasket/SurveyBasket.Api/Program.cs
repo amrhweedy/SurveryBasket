@@ -1,7 +1,5 @@
 var builder = WebApplication.CreateBuilder(args);
 
-
-
 builder.Services.AddDependencies(builder.Configuration);
 
 var app = builder.Build();
@@ -12,12 +10,10 @@ if (app.Environment.IsDevelopment())  // it knows that we are in development mod
     app.UseSwaggerUI();
 }
 
-
-
 app.UseHttpsRedirection();  // to redirect http to https, it means if i use http it will redirect to https
 
 
-app.UseCors("MyPolicy");  // it must come before the authentication 
+app.UseCors();  // it must come before the authentication 
 
 
 app.UseAuthorization();

@@ -23,22 +23,13 @@ public static class DependencyInjection
 
         services.AddCors(options =>
         {
-            options.AddPolicy("MyPolicy1", builder =>
+            options.AddDefaultPolicy( builder =>
             {
                 builder
                 .AllowAnyHeader()
                 .AllowAnyMethod()
-                .WithOrigins("abc.com");
+                .AllowAnyOrigin();
             });
-
-            options.AddPolicy("MyPolicy2", builder =>
-            {
-                builder
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .WithOrigins("xyz.com");
-            });
-
         });
 
 
