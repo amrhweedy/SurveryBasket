@@ -14,7 +14,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 
 
     [HttpGet]
-    [DisableCors]
+    [EnableCors("MyPolicy1")]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var polls = await _pollService.GetAllAsync(cancellationToken);
@@ -23,6 +23,7 @@ public class PollsController(IPollService pollService) : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [EnableCors("MyPolicy2")]
     public async Task<IActionResult> Get([FromRoute] int id, CancellationToken cancellationToken)
     {
         var poll = await _pollService.GetAsync(id, cancellationToken);
