@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using SurveyBasket.Api.Contracts.Polls;
 using SurveyBasket.Api.Services.Polls;
 
@@ -13,6 +14,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 
 
     [HttpGet]
+    [DisableCors]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var polls = await _pollService.GetAllAsync(cancellationToken);
