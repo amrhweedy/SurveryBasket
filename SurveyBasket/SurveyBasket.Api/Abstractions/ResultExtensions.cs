@@ -1,8 +1,10 @@
-﻿namespace SurveyBasket.Api.Abstractions;
+﻿using System.Reflection;
+
+namespace SurveyBasket.Api.Abstractions;
 
 public static class ResultExtensions
 {
-    public static ObjectResult ToProblem(this Result result, int status)  // i need finally from this method to return objectResult with problemDetails
+    public static ObjectResult ToProblem( this Result result , int status )  // i need finally from this method to return objectResult with problemDetails
     {
         if (result.IsSuccess)
             throw new InvalidOperationException();
@@ -15,7 +17,7 @@ public static class ResultExtensions
         ProblemDetails? problemDetails = problem.GetType().GetProperty(nameof(ProblemDetails))!.GetValue(problem) as ProblemDetails;  // cast to convert from object to ProblemDetails
 
         problemDetails!.Extensions.Add("errors", new object[] { result.Error });   // to add property errors in the response         
-        return new ObjectResult(problemDetails);
+        return new ObjectResult(problemDetails );
 
     }
 }

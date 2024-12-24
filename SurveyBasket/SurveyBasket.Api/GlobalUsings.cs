@@ -13,6 +13,8 @@ global using SurveyBasket.Api.Entities;
 global using SurveyBasket.Api.Persistence;
 global using System.ComponentModel.DataAnnotations;
 global using System.Reflection;
+global using SurveyBasket.Api.Abstractions;
+
 
 
 
