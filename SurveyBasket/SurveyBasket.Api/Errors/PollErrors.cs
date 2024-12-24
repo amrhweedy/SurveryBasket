@@ -1,4 +1,5 @@
-﻿namespace SurveyBasket.Api.Errors;
+﻿
+namespace SurveyBasket.Api.Errors;
 
 public static class PollErrors
 {

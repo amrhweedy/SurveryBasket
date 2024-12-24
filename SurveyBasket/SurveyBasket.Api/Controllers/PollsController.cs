@@ -27,7 +27,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 
         return pollResult.IsSuccess
             ? Ok(pollResult.Value)
-            : Problem(statusCode: StatusCodes.Status404NotFound, title: pollResult.Error.Code, detail: pollResult.Error.Description);
+            : pollResult.ToProblem(status: StatusCodes.Status404NotFound);
     }
 
     [HttpPost]
@@ -54,7 +54,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 
         return result.IsSuccess
             ? NoContent()  // 204
-            : Problem(statusCode: StatusCodes.Status404NotFound, title: result.Error.Code, detail: result.Error.Description);
+            : result.ToProblem(status: StatusCodes.Status404NotFound);
 
     }
 
@@ -65,7 +65,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 
         return result.IsSuccess
             ? NoContent()
-            : Problem(statusCode: StatusCodes.Status404NotFound, title: result.Error.Code, detail: result.Error.Description);
+            : result.ToProblem(status: StatusCodes.Status404NotFound);
     }
 
 
@@ -76,7 +76,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 
         return result.IsSuccess
             ? NoContent()
-            : Problem(statusCode: StatusCodes.Status404NotFound, title: result.Error.Code, detail: result.Error.Description);
+            : result.ToProblem(status: StatusCodes.Status404NotFound);
     }
 
     [HttpGet("test-header")]

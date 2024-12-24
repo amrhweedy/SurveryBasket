@@ -23,7 +23,7 @@ public class AuthController(IAuthService authService,
 
         return authResult.IsSuccess
            ? Ok(authResult.Value)
-            : Problem(statusCode: StatusCodes.Status400BadRequest, title: authResult.Error.Code, detail: authResult.Error.Description);
+            : authResult.ToProblem( status: StatusCodes.Status400BadRequest);
     }
 
 
@@ -33,7 +33,9 @@ public class AuthController(IAuthService authService,
     {
         var authResult = await _authService.GetRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
 
-        return authResult.IsSuccess ? Ok(authResult.Value) : Problem(statusCode: StatusCodes.Status400BadRequest, title: authResult.Error.Code, detail: authResult.Error.Description);
+        return authResult.IsSuccess 
+            ? Ok(authResult.Value) 
+            : authResult.ToProblem (status: StatusCodes.Status400BadRequest);
     }
 
 
@@ -43,7 +45,9 @@ public class AuthController(IAuthService authService,
     {
         var authResult = await _authService.RevokeTokenAsync(request.Token, request.RefreshToken, cancellationToken);
 
-        return authResult.IsSuccess ? Ok() : Problem(statusCode: StatusCodes.Status400BadRequest, title: authResult.Error.Code, detail: authResult.Error.Description);
+        return authResult.IsSuccess 
+            ? Ok()
+            : authResult.ToProblem(status: StatusCodes.Status400BadRequest);
     }
 
     [HttpGet("TestOptionsPattern")]

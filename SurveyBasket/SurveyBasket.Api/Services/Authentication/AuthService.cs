@@ -1,4 +1,5 @@
-﻿using SurveyBasket.Api.Authentication;
+﻿using SurveyBasket.Api.Abstractions;
+using SurveyBasket.Api.Authentication;
 using SurveyBasket.Api.Contracts.Authentication;
 using SurveyBasket.Api.Errors;
 using System.Security.Cryptography;
@@ -118,10 +119,29 @@ public class AuthService(UserManager<ApplicationUser> userManager, IJwtProvider 
     }
 
 
+    public async Task<Result> AddUserAsync(RegisterRequest request, CancellationToken cancellationToken = default)
+    {
+        var user = new ApplicationUser
+        {
+            Email = request.Email,
+            UserName = request.Email,
+            FirstName = request.FirstName,
+            LastName = request.LastName
+        };
+
+        var result = await _userManager.CreateAsync(user, request.Password);
+
+        if (result.Succeeded)
+            return Result.Success();
+
+        return Result.Failure(new Error(result.Errors.FirstOrDefault().Code , result.Errors.FirstOrDefault().Description));
+     }
+
+
     private string GenerateRefreshToke()
     {
         return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
     }
 
-
+    
 }
