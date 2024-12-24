@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using SurveyBasket.Api.Contracts.Polls;
+using SurveyBasket.Api.Errors;
 using SurveyBasket.Api.Services.Polls;
 
 namespace SurveyBasket.Api.Controllers;
@@ -33,9 +34,11 @@ public class PollsController(IPollService pollService) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Add([FromBody] CreatePollRequest request, CancellationToken cancellationToken)
     {
-        var newPoll = await _pollService.AddAsync(request, cancellationToken);
+        var result = await _pollService.AddAsync(request, cancellationToken);
 
-        return CreatedAtAction(nameof(Get), new { id = newPoll.Id }, newPoll);  // 201
+        return result.IsSuccess
+            ? CreatedAtAction(nameof(Get), new { id = result.Value.Id }, result.Value)   // 201
+            : result.ToProblem(StatusCodes.Status409Conflict);
 
 
         // one of the rest guidelines says that when you create a new resource in the server the client must know how can access this resource 
@@ -52,10 +55,12 @@ public class PollsController(IPollService pollService) : ControllerBase
     {
         var result = await _pollService.UpdateAsync(id, request, cancellationToken);
 
-        return result.IsSuccess
-            ? NoContent()  // 204
-            : result.ToProblem(status: StatusCodes.Status404NotFound);
+        if (result.IsSuccess)
+            return NoContent();
 
+        return result.Error.Equals(PollErrors.PollNotFound)
+            ? result.ToProblem(status: StatusCodes.Status404NotFound)
+            : result.ToProblem(status: StatusCodes.Status409Conflict);
     }
 
     [HttpDelete("{id}")]

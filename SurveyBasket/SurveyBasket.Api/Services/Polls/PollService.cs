@@ -18,26 +18,37 @@ public class PollService(ApplicationDbContext context) : IPollService
         return poll is null ? Result.Failure<PollResponse>(PollErrors.PollNotFound) : Result.Success(poll.Adapt<PollResponse>());
     }
 
-    public async Task<PollResponse> AddAsync(CreatePollRequest request, CancellationToken cancellationToken)
+    public async Task<Result<PollResponse>> AddAsync(CreatePollRequest request, CancellationToken cancellationToken)
     {
+        if (await _context.Polls.AnyAsync(poll => poll.Title == request.Title, cancellationToken))
+        {
+            return Result.Failure<PollResponse>(PollErrors.DuplicatedPollTitle);
+        }
+
         var poll = request.Adapt<Poll>();
         await _context.Polls.AddAsync(poll, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
-        return poll.Adapt<PollResponse>();
+
+        return Result.Success(poll.Adapt<PollResponse>());
 
     }
 
     public async Task<Result> UpdateAsync(int Id, CreatePollRequest request, CancellationToken cancellationToken)
     {
-        var poll = await _context.Polls.FindAsync(Id, cancellationToken);
+        var isExistingTitle = await _context.Polls.AnyAsync(poll => poll.Title == request.Title && poll.Id != Id, cancellationToken);
 
-        if (poll is null)
+        if (isExistingTitle)
+            return Result.Failure<PollResponse>(PollErrors.DuplicatedPollTitle);
+
+        var currentPoll = await _context.Polls.FindAsync(Id, cancellationToken);
+
+        if (currentPoll is null)
             return Result.Failure(PollErrors.PollNotFound);
 
-        poll.Title = request.Title;
-        poll.Summary = request.Summary;
-        poll.StartsAt = request.StartsAt;
-        poll.EndsAt = request.EndsAt;
+        currentPoll.Title = request.Title;
+        currentPoll.Summary = request.Summary;
+        currentPoll.StartsAt = request.StartsAt;
+        currentPoll.EndsAt = request.EndsAt;
 
         await _context.SaveChangesAsync(cancellationToken);
         return Result.Success();

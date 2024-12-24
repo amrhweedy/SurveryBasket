@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using SurveyBasket.Api.Authentication;
+using SurveyBasket.Api.Errors;
 using SurveyBasket.Api.Services.Authentication;
 using SurveyBasket.Api.Services.Polls;
 using System.Text;
@@ -23,7 +24,7 @@ public static class DependencyInjection
 
         services.AddCors(options =>
         {
-            options.AddDefaultPolicy( builder =>
+            options.AddDefaultPolicy(builder =>
             {
                 builder
                 .AllowAnyHeader()
@@ -57,6 +58,10 @@ public static class DependencyInjection
 
         // Authentication
         services.AddAuthenticationConfig(configuration);
+
+        // Exception Handling
+        services.AddExceptionHandler<GlobalExceptionHandler>();
+        services.AddProblemDetails();
 
         return services;
     }
