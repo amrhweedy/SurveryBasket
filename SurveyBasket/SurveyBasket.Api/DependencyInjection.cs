@@ -4,6 +4,7 @@ using SurveyBasket.Api.Authentication;
 using SurveyBasket.Api.Errors;
 using SurveyBasket.Api.Services.Authentication;
 using SurveyBasket.Api.Services.Polls;
+using SurveyBasket.Api.Services.Questions;
 using System.Text;
 
 namespace SurveyBasket.Api;
@@ -49,6 +50,7 @@ public static class DependencyInjection
         // services
         services.AddScoped<IPollService, PollService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IQuestionService, QuestionService>();
 
         // FluentValidation
         services.AddFluentValidationConfig();

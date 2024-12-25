@@ -16,5 +16,11 @@ public class MappingConfigurations : IRegister
         // mapping from student to studentResponse and vice versa
         // config.NewConfig<Student, StudentResponse>().TwoWays();
 
+
+
+        // Question
+
+      
+
     }
 }

@@ -13,7 +13,10 @@ global using SurveyBasket.Api.Entities;
 global using SurveyBasket.Api.Persistence;
 global using System.ComponentModel.DataAnnotations;
 global using System.Reflection;
-global using SurveyBasket.Api.Abstractions;
+ global using Microsoft.AspNetCore.Authorization;
+global using SurveyBasket.Api.Contracts.Questions;
+global using SurveyBasket.Api.Errors;
+global using SurveyBasket.Api.Services.Questions;
 
 
 
