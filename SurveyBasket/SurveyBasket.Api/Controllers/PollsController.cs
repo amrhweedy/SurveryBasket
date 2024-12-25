@@ -61,6 +61,9 @@ public class PollsController(IPollService pollService) : ControllerBase
         return result.Error.Equals(PollErrors.PollNotFound)
             ? result.ToProblem(status: StatusCodes.Status404NotFound)
             : result.ToProblem(status: StatusCodes.Status409Conflict);
+
+        // the Equals method works as a value-based comparison here because the Error type is a record
+        // the record override the equals method automatically to compare the values of its fields
     }
 
     [HttpDelete("{id}")]
