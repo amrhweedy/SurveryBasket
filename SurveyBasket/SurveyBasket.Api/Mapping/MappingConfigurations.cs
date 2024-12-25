@@ -19,8 +19,13 @@ public class MappingConfigurations : IRegister
 
 
         // Question
+        // first solution 
+        config.NewConfig<QuestionRequest, Question>()
+            .Map(dest => dest.Answers, src => src.Answers.Select(answer => new Answer { Content = answer }));
 
-      
+        // second solution
+        //config.NewConfig<QuestionRequest, Question>()
+        //    .Ignore(dest => dest.Answers);
 
     }
 }

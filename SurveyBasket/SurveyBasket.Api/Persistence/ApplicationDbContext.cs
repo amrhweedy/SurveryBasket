@@ -4,7 +4,7 @@ using System.Security.Claims;
 
 namespace SurveyBasket.Api.Persistence;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options , IHttpContextAccessor httpContextAccessor) : IdentityDbContext<ApplicationUser>(options)
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IHttpContextAccessor httpContextAccessor) : IdentityDbContext<ApplicationUser>(options)
 {
     private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
@@ -17,6 +17,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         // select all foreign keys that have cascade delete behavior and are not owned
+        //we make this because the problem of cycles or multiple cascade paths
         var cascadeFKS = modelBuilder.Model
             .GetEntityTypes()
             .SelectMany(t => t.GetForeignKeys())
@@ -36,11 +37,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     {
         var entries = ChangeTracker.Entries<AuditableEntity>(); // the EF will track the Entities which are derived from AuditableEntity only like poll 
 
-        foreach(var entityEntry in entries)
+        foreach (var entityEntry in entries)
         {
             var currentUserId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-            if(entityEntry.State == EntityState.Added)
+            if (entityEntry.State == EntityState.Added)
             {
                 entityEntry.Property(x => x.CreatedById).CurrentValue = currentUserId;
             }

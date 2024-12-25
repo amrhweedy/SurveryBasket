@@ -6,7 +6,9 @@ public class QuestionRequestValidator : AbstractValidator<QuestionRequest>
     {
         RuleFor(x => x.Content)
             .NotEmpty()
-            .Length(3, 1000);
+            .WithMessage("Question {PropertyName} is required")
+            .Length(3, 1000)
+            .WithMessage("Question {PropertyName} should be between {MinLength} and {MaxLength} characters");
 
         RuleFor(x => x.Answers)
             .NotNull();
@@ -22,7 +24,7 @@ public class QuestionRequestValidator : AbstractValidator<QuestionRequest>
         // but the answers.Count will return 3
         // so it will give me this error
         RuleFor(x => x.Answers)
-          .Must(answers => answers.Distinct().Count() == answers.Count )
+          .Must(answers => answers.Distinct().Count() == answers.Count)
           .WithMessage("you can not add duplicated answers for the same question")
           .When(x => x.Answers is not null);
 
