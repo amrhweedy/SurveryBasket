@@ -1,16 +1,25 @@
-﻿using SurveyBasket.Api.Contracts.Polls;
-using SurveyBasket.Api.Errors;
-
-namespace SurveyBasket.Api.Services.Polls;
+﻿namespace SurveyBasket.Api.Services.Polls;
 
 public class PollService(ApplicationDbContext context) : IPollService
 {
 
     private readonly ApplicationDbContext _context = context;
 
-    public async Task<IEnumerable<Poll>> GetAllAsync(CancellationToken cancellationToken) =>
-        await _context.Polls.AsNoTracking().ToListAsync(cancellationToken);
+    public async Task<IEnumerable<PollResponse>> GetAllAsync(CancellationToken cancellationToken) =>
+         await _context.Polls
+         .ProjectToType<PollResponse>()   // it make this projection in the database to get specific columns not all columns
+         .AsNoTracking()
+         .ToListAsync(cancellationToken);
 
+
+    public async Task<IEnumerable<PollResponse>> GetCurrentAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Polls
+             .Where(poll => poll.IsPublished && poll.StartsAt <= DateOnly.FromDateTime(DateTime.UtcNow) && poll.EndsAt >= DateOnly.FromDateTime(DateTime.UtcNow))
+             .ProjectToType<PollResponse>()
+             .AsNoTracking()
+             .ToListAsync(cancellationToken);
+    }
 
     public async Task<Result<PollResponse>> GetAsync(int Id, CancellationToken cancellationToken)
     {
@@ -83,4 +92,6 @@ public class PollService(ApplicationDbContext context) : IPollService
 
         return Result.Success();
     }
+
+
 }

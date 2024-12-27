@@ -1,4 +1,6 @@
-﻿namespace SurveyBasket.Api.Services.Questions;
+﻿using SurveyBasket.Api.Contracts.Answers;
+
+namespace SurveyBasket.Api.Services.Questions;
 
 public class QuestionService(ApplicationDbContext context) : IQuestionService
 {
@@ -25,6 +27,41 @@ public class QuestionService(ApplicationDbContext context) : IQuestionService
             .ToListAsync(cancellationToken);
 
         return Result.Success<IEnumerable<QuestionResponse>>(questions);
+    }
+
+    // we need here to get the available questions with answers for the specific poll to make the user votes on this poll (vote on every question inside this poll)
+    public async Task<Result<IEnumerable<QuestionResponse>>> GetAvailableAsync(int pollId, string userId, CancellationToken cancellationToken = default)
+    {
+        // 1- check for this user votes before for this poll
+        var hasVote = await _context.Votes.AnyAsync(v => v.PollId == pollId && v.UserId == userId, cancellationToken);
+
+        if (hasVote)
+            return Result.Failure<IEnumerable<QuestionResponse>>(VoteErrors.DuplicatedVote);
+
+        //2- check for existing poll
+        var isExistingPoll = await _context.Polls
+            .AnyAsync(p => p.Id == pollId && p.IsPublished && p.StartsAt <= DateOnly.FromDateTime(DateTime.UtcNow) && p.EndsAt >= DateOnly.FromDateTime(DateTime.UtcNow), cancellationToken);
+
+        if (!isExistingPoll)
+            return Result.Failure<IEnumerable<QuestionResponse>>(PollErrors.PollNotFound);
+
+        // 3- get the available active questions with the active answers
+        var questions = await _context.Questions
+            .Where(q => q.PollId == pollId && q.IsActive)
+            .Include(q => q.Answers)
+            .Select(q => new QuestionResponse
+            (
+                q.Id,
+                q.Content,
+                q.Answers.Where(a => a.IsActive).Select(a => new AnswerResponse(a.Id, a.Content))
+
+            ))
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+
+        return Result.Success<IEnumerable<QuestionResponse>>(questions);
+
     }
 
 

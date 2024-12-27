@@ -19,15 +19,10 @@ public class AuthController(IAuthService authService,
     [HttpPost]
     public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
-
         var authResult = await _authService.GetTokenAsync(request.Email, request.Password, cancellationToken);
 
-        return authResult.IsSuccess
-           ? Ok(authResult.Value)
-            : authResult.ToProblem(status: StatusCodes.Status400BadRequest);
+        return authResult.IsSuccess ? Ok(authResult.Value) : authResult.ToProblem();
     }
-
-
 
     [HttpPost("refresh")]
     public async Task<IActionResult> RefreshAsync([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken)
@@ -35,9 +30,7 @@ public class AuthController(IAuthService authService,
 
         var authResult = await _authService.GetRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
 
-        return authResult.IsSuccess
-            ? Ok(authResult.Value)
-            : authResult.ToProblem(status: StatusCodes.Status400BadRequest);
+        return authResult.IsSuccess ? Ok(authResult.Value) : authResult.ToProblem();
     }
 
 
@@ -47,9 +40,7 @@ public class AuthController(IAuthService authService,
     {
         var authResult = await _authService.RevokeTokenAsync(request.Token, request.RefreshToken, cancellationToken);
 
-        return authResult.IsSuccess
-            ? Ok()
-            : authResult.ToProblem(status: StatusCodes.Status400BadRequest);
+        return authResult.IsSuccess ? Ok() : authResult.ToProblem();
     }
 
     [HttpGet("TestOptionsPattern")]

@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using SurveyBasket.Api.Contracts.Polls;
-using SurveyBasket.Api.Errors;
-using SurveyBasket.Api.Services.Polls;
+﻿
 
 namespace SurveyBasket.Api.Controllers;
 [Route("api/[controller]")]
@@ -10,15 +7,22 @@ namespace SurveyBasket.Api.Controllers;
 
 public class PollsController(IPollService pollService) : ControllerBase
 {
-    private readonly IPollService _pollService = pollService;
 
+    private readonly IPollService _pollService = pollService;
 
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var polls = await _pollService.GetAllAsync(cancellationToken);
-        var response = polls.Adapt<IEnumerable<PollResponse>>();
-        return Ok(response);
+        return Ok(polls);
+    }
+
+
+    [HttpGet("current")]
+    public async Task<IActionResult> GetCurrent(CancellationToken cancellationToken)
+    {
+        var polls = await _pollService.GetCurrentAsync(cancellationToken);
+        return Ok(polls);
     }
 
     [HttpGet("{id}")]
@@ -26,9 +30,7 @@ public class PollsController(IPollService pollService) : ControllerBase
     {
         var pollResult = await _pollService.GetAsync(id, cancellationToken);
 
-        return pollResult.IsSuccess
-            ? Ok(pollResult.Value)
-            : pollResult.ToProblem(status: StatusCodes.Status404NotFound);
+        return pollResult.IsSuccess ? Ok(pollResult.Value) : pollResult.ToProblem();
     }
 
     [HttpPost]
@@ -38,7 +40,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 
         return result.IsSuccess
             ? CreatedAtAction(nameof(Get), new { id = result.Value.Id }, result.Value)   // 201
-            : result.ToProblem(StatusCodes.Status409Conflict);
+            : result.ToProblem();
 
 
         // one of the rest guidelines says that when you create a new resource in the server the client must know how can access this resource 
@@ -55,12 +57,15 @@ public class PollsController(IPollService pollService) : ControllerBase
     {
         var result = await _pollService.UpdateAsync(id, request, cancellationToken);
 
-        if (result.IsSuccess)
-            return NoContent();
+        return result.IsSuccess ? NoContent() : result.ToProblem();
 
-        return result.Error.Equals(PollErrors.PollNotFound)
-            ? result.ToProblem(status: StatusCodes.Status404NotFound)
-            : result.ToProblem(status: StatusCodes.Status409Conflict);
+
+        //if (result.IsSuccess)
+        //    return NoContent();
+
+        //return result.Error.Equals(PollErrors.PollNotFound)
+        //    ? result.ToProblem(status: StatusCodes.Status404NotFound)
+        //    : result.ToProblem(status: StatusCodes.Status409Conflict);
 
         // the Equals method works as a value-based comparison here because the Error type is a record
         // the record override the equals method automatically to compare the values of its fields
@@ -71,9 +76,7 @@ public class PollsController(IPollService pollService) : ControllerBase
     {
         var result = await _pollService.DeleteAsync(id, cancellationToken);
 
-        return result.IsSuccess
-            ? NoContent()
-            : result.ToProblem(status: StatusCodes.Status404NotFound);
+        return result.IsSuccess ? NoContent() : result.ToProblem();
     }
 
 
@@ -82,9 +85,7 @@ public class PollsController(IPollService pollService) : ControllerBase
     {
         var result = await _pollService.TogglePublishStatusAsync(id, cancellationToken);
 
-        return result.IsSuccess
-            ? NoContent()
-            : result.ToProblem(status: StatusCodes.Status404NotFound);
+        return result.IsSuccess ? NoContent() : result.ToProblem();
     }
 
     [HttpGet("test-header")]

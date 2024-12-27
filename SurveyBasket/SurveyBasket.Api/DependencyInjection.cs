@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using SurveyBasket.Api.Authentication;
-using SurveyBasket.Api.Errors;
 using SurveyBasket.Api.Services.Authentication;
-using SurveyBasket.Api.Services.Polls;
-using SurveyBasket.Api.Services.Questions;
+using SurveyBasket.Api.Services.Votes;
 using System.Text;
 
 namespace SurveyBasket.Api;
@@ -51,6 +49,7 @@ public static class DependencyInjection
         services.AddScoped<IPollService, PollService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IQuestionService, QuestionService>();
+        services.AddScoped<IVoteService, VoteService>();
 
         // FluentValidation
         services.AddFluentValidationConfig();

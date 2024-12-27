@@ -14,9 +14,7 @@ public class QuestionsController(IQuestionService questionService) : ControllerB
     {
         var result = await _questionService.GetAllAsync(pollId, cancellationToken);
 
-        return result.IsSuccess
-            ? Ok(result.Value)
-            : result.ToProblem(StatusCodes.Status404NotFound);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
 
 
@@ -25,24 +23,18 @@ public class QuestionsController(IQuestionService questionService) : ControllerB
     {
         var result = await _questionService.GetAsync(pollId, id, cancellationToken);
 
-        return result.IsSuccess
-            ? Ok(result.Value)
-            : result.ToProblem(StatusCodes.Status404NotFound);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
 
 
     [HttpPost]
     public async Task<IActionResult> Add([FromRoute] int pollId, [FromBody] QuestionRequest request, CancellationToken cancellationToken)
     {
-
         var result = await _questionService.AddAsync(pollId, request, cancellationToken);
 
-        if (result.IsSuccess)
-            return CreatedAtAction(nameof(Get), new { pollId = pollId, id = result.Value.Id }, result.Value);
-
-        return result.Error.Equals(QuestionErrors.DuplicatedQuestionContent)
-            ? result.ToProblem(status: StatusCodes.Status409Conflict)
-            : result.ToProblem(status: StatusCodes.Status404NotFound);
+        return result.IsSuccess
+            ? CreatedAtAction(nameof(Get), new { pollId = pollId, id = result.Value.Id }, result.Value)
+            : result.ToProblem();
 
     }
 
@@ -51,12 +43,7 @@ public class QuestionsController(IQuestionService questionService) : ControllerB
     {
         var result = await _questionService.UpdateAsync(pollId, id, request, cancellationToken);
 
-        if (result.IsSuccess)
-            return Ok(result.Value);
-
-        return result.Error.Equals(QuestionErrors.DuplicatedQuestionContent)
-            ? result.ToProblem(status: StatusCodes.Status409Conflict)
-            : result.ToProblem(status: StatusCodes.Status404NotFound);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
 
 
@@ -65,9 +52,7 @@ public class QuestionsController(IQuestionService questionService) : ControllerB
     {
         var result = await _questionService.ToggleStatsAsync(pollId, id, cancellationToken);
 
-        return result.IsSuccess
-            ? NoContent()
-            : result.ToProblem(status: StatusCodes.Status404NotFound);
+        return result.IsSuccess ? NoContent() : result.ToProblem();
     }
 
 }

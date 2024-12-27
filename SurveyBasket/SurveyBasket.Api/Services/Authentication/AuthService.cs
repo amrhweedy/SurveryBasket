@@ -1,6 +1,5 @@
 ﻿using SurveyBasket.Api.Authentication;
 using SurveyBasket.Api.Contracts.Authentication;
-using SurveyBasket.Api.Errors;
 using System.Security.Cryptography;
 
 namespace SurveyBasket.Api.Services.Authentication;
@@ -133,8 +132,8 @@ public class AuthService(UserManager<ApplicationUser> userManager, IJwtProvider 
         if (result.Succeeded)
             return Result.Success();
 
-        return Result.Failure(new Error(result.Errors.FirstOrDefault().Code , result.Errors.FirstOrDefault().Description));
-     }
+        return Result.Failure(new Error(result.Errors.FirstOrDefault().Code, result.Errors.FirstOrDefault().Description, null));
+    }
 
 
     private string GenerateRefreshToke()
@@ -142,5 +141,5 @@ public class AuthService(UserManager<ApplicationUser> userManager, IJwtProvider 
         return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
     }
 
-    
+
 }
