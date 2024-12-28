@@ -1,6 +1,22 @@
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDependencies(builder.Configuration);
+
+//builder.Host.UseSerilog((context, configuration) =>
+//{
+//    configuration
+//    .MinimumLevel.Information()
+//    .WriteTo.Console();
+//});
+
+// if i need to read the serilog configuration from the appSettings.json
+
+
+builder.Host.UseSerilog((context, configuration) =>
+configuration.ReadFrom.Configuration(context.Configuration)
+);
 
 
 var app = builder.Build();
@@ -10,6 +26,8 @@ if (app.Environment.IsDevelopment())  // it knows that we are in development mod
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();  // to redirect http to https, it means if i use http it will redirect to https
 
