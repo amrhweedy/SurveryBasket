@@ -19,7 +19,18 @@ configuration.ReadFrom.Configuration(context.Configuration)
 );
 
 
-builder.Services.AddResponseCaching();
+//builder.Services.AddResponseCaching();
+
+builder.Services.AddOutputCache(options =>
+{
+    options
+    .AddPolicy("Polls", x =>
+    x
+    .Cache()
+    .Expire(TimeSpan.FromSeconds(60))
+    .Tag("AvailableQuestions")
+    );
+});
 
 var app = builder.Build();
 
@@ -38,7 +49,9 @@ app.UseCors();  // it must come before the authentication
 
 app.UseAuthorization();
 
-app.UseResponseCaching();
+//app.UseResponseCaching();
+
+app.UseOutputCache();
 
 app.MapControllers(); //scans all controllers in the application and collects the routes defined in those controllers. When a request is sent, the routing system will match the request URL to one of the collected routes, and then direct the request to the appropriate controller and action that handles that route.
 

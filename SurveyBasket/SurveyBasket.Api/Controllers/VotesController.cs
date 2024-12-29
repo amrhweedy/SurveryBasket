@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.AspNetCore.OutputCaching;
 using SurveyBasket.Api.Contracts.Votes;
 using SurveyBasket.Api.Services.Votes;
 
@@ -12,7 +13,7 @@ public class VotesController(IQuestionService questionService, IVoteService vote
     private readonly IVoteService _voteService = voteService;
 
     [HttpGet]
-    [ResponseCache(Duration = 60)]
+    [OutputCache(PolicyName = "Polls")]
 
     public async Task<IActionResult> Start([FromRoute] int pollId, CancellationToken cancellationToken)
     {
