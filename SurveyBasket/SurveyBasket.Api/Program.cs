@@ -21,16 +21,20 @@ configuration.ReadFrom.Configuration(context.Configuration)
 
 //builder.Services.AddResponseCaching();
 
-builder.Services.AddOutputCache(options =>
-{
-    options
-    .AddPolicy("Polls", x =>
-    x
-    .Cache()
-    .Expire(TimeSpan.FromSeconds(60))
-    .Tag("AvailableQuestions")
-    );
-});
+//builder.Services.AddOutputCache(options =>
+//{
+//    options
+//    .AddPolicy("Polls", x =>
+//    x
+//    .Cache()
+//    .Expire(TimeSpan.FromSeconds(60))
+//    .Tag("AvailableQuestions")
+//    );
+//});
+
+
+builder.Services.AddMemoryCache();
+
 
 var app = builder.Build();
 
