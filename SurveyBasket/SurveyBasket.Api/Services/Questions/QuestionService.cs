@@ -1,12 +1,13 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using SurveyBasket.Api.Contracts.Answers;
+﻿using SurveyBasket.Api.Contracts.Answers;
+using SurveyBasket.Api.Services.Cashing;
 
 namespace SurveyBasket.Api.Services.Questions;
 
-public class QuestionService(ApplicationDbContext context, IMemoryCache memoryCache) : IQuestionService
+public class QuestionService(ApplicationDbContext context, ICacheService cacheService, ILogger<QuestionService> logger) : IQuestionService
 {
     private readonly ApplicationDbContext _context = context;
-    private readonly IMemoryCache _memoryCache = memoryCache;
+    private readonly ICacheService _cacheService = cacheService;
+    private readonly ILogger<QuestionService> _logger = logger;
     private const string _cachePrefix = "AvailableQuestions";
 
     public async Task<Result<IEnumerable<QuestionResponse>>> GetAllAsync(int pollId, CancellationToken cancellationToken = default)
@@ -49,28 +50,37 @@ public class QuestionService(ApplicationDbContext context, IMemoryCache memoryCa
 
         var cacheKey = $"{_cachePrefix}-{pollId}"; // the cache key must be unique so i use the pollId in the key to make every poll has a different cache about the another polls
 
-        // 3- get the available active questions with the active answers
-        var questions = await _memoryCache.GetOrCreateAsync(
-            cacheKey,
-             casheEntry =>
-             {
+        // get the questions from the cache
+        var cachedQuestions = await _cacheService.GetAsync<IEnumerable<QuestionResponse>>(cacheKey, cancellationToken);
 
-                 casheEntry.SlidingExpiration = TimeSpan.FromMinutes(5);
-                 return _context.Questions
-               .Where(q => q.PollId == pollId && q.IsActive)
-               .Include(q => q.Answers)
-               .Select(q => new QuestionResponse
-               (
-                   q.Id,
-                   q.Content,
-                   q.Answers.Where(a => a.IsActive).Select(a => new AnswerResponse(a.Id, a.Content))
+        IEnumerable<QuestionResponse> questions = [];
 
-               ))
-               .AsNoTracking()
-               .ToListAsync(cancellationToken);
-             }
-            );
+        if (cachedQuestions is null)
+        {
 
+            _logger.LogInformation("get questions from the database");
+
+            questions = await _context.Questions
+                  .Where(q => q.PollId == pollId && q.IsActive)
+                  .Include(q => q.Answers)
+                  .Select(q => new QuestionResponse(
+                      q.Id,
+                      q.Content,
+                      q.Answers.Where(a => a.IsActive).Select(a => new AnswerResponse(a.Id, a.Content))
+
+                      ))
+                      .AsNoTracking()
+                      .ToListAsync(cancellationToken);
+
+            await _cacheService.SetAsync(cacheKey, questions, cancellationToken: cancellationToken);
+        }
+
+        else
+        {
+            _logger.LogInformation("get questions from cache");
+
+            questions = cachedQuestions;
+        }
 
         return Result.Success<IEnumerable<QuestionResponse>>(questions!);
 
@@ -127,7 +137,8 @@ public class QuestionService(ApplicationDbContext context, IMemoryCache memoryCa
         await _context.Questions.AddAsync(question, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
-        _memoryCache.Remove(key: $"{_cachePrefix}-{pollId}");
+        //remove the cache
+        await _cacheService.RemoveAsync(key: $"{_cachePrefix}-{pollId}", cancellationToken);
 
         return Result.Success<QuestionResponse>(question.Adapt<QuestionResponse>());
     }
@@ -177,7 +188,8 @@ public class QuestionService(ApplicationDbContext context, IMemoryCache memoryCa
 
 
         await _context.SaveChangesAsync(cancellationToken);
-        _memoryCache.Remove(key: $"{_cachePrefix}-{pollId}");
+        // remove the cache
+        await _cacheService.RemoveAsync(key: $"{_cachePrefix}-{pollId}", cancellationToken);
 
 
         return Result.Success<QuestionResponse>(question.Adapt<QuestionResponse>());
@@ -200,7 +212,8 @@ public class QuestionService(ApplicationDbContext context, IMemoryCache memoryCa
         question.IsActive = !question.IsActive;
 
         await _context.SaveChangesAsync(cancellationToken);
-        _memoryCache.Remove(key: $"{_cachePrefix}-{pollId}");
+        // remove the cache
+        await _cacheService.RemoveAsync(key: $"{_cachePrefix}-{pollId}", cancellationToken);
 
 
         return Result.Success();

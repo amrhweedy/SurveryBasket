@@ -1,20 +1,16 @@
-﻿
-using Microsoft.AspNetCore.OutputCaching;
-using SurveyBasket.Api.Contracts.Votes;
+﻿using SurveyBasket.Api.Contracts.Votes;
 using SurveyBasket.Api.Services.Votes;
 
 namespace SurveyBasket.Api.Controllers;
 [Route("api/polls/{pollId}/vote")]
 [ApiController]
-//[Authorize]
+[Authorize]
 public class VotesController(IQuestionService questionService, IVoteService voteService) : ControllerBase
 {
     private readonly IQuestionService _questionService = questionService;
     private readonly IVoteService _voteService = voteService;
 
     [HttpGet]
-    [OutputCache(PolicyName = "Polls")]
-
     public async Task<IActionResult> Start([FromRoute] int pollId, CancellationToken cancellationToken)
     {
         // var userId = User.GetUserId(); // this User Property is inside the ControllerBase so the votes controller inherits it
