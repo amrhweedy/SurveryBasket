@@ -32,7 +32,6 @@ public class AuthController(IAuthService authService,
     }
 
 
-
     #region normal register , create token and refresh token after the user registers
 
     //[HttpPost("register")]
@@ -54,7 +53,6 @@ public class AuthController(IAuthService authService,
     }
 
 
-
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken)
     {
@@ -63,7 +61,6 @@ public class AuthController(IAuthService authService,
 
         return authResult.IsSuccess ? Ok(authResult.Value) : authResult.ToProblem();
     }
-
 
 
     [HttpPut("revoke-refresh-token")]
@@ -86,6 +83,17 @@ public class AuthController(IAuthService authService,
         return result.IsSuccess ? Ok() : result.ToProblem();
     }
 
+
+
+    // if the email is not send to the user because of any problem we will use this endpoint to resend the email to the user again
+
+    [HttpPost("resend-confirmation-email")]
+    public async Task<IActionResult> ResendConfirmationEmail([FromBody] ResendConfirmationEmailRequest request)
+    {
+        var result = await _authService.ResendConfirmationEmailAsync(request);
+
+        return result.IsSuccess ? Ok() : result.ToProblem();
+    }
 
 
 

@@ -73,7 +73,7 @@ public class AuthService(
 
         // check password
 
-        var result = await _signInManager.PasswordSignInAsync(user, Password, false,false);
+        var result = await _signInManager.PasswordSignInAsync(user, Password, false, false);
 
         if (result.Succeeded)
         {
@@ -101,8 +101,8 @@ public class AuthService(
             return Result.Success<AuthResponse>(response);
         }
 
-        
-        return Result.Failure<AuthResponse>(result.IsNotAllowed? UserErrors.EmailNotConfirmed : UserErrors.InvalidCredentials);
+
+        return Result.Failure<AuthResponse>(result.IsNotAllowed ? UserErrors.EmailNotConfirmed : UserErrors.InvalidCredentials);
     }
 
 
@@ -187,7 +187,7 @@ public class AuthService(
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
-            _logger.LogInformation("confirmation code :{code}" , code);
+            _logger.LogInformation("confirmation code :{code}", code);
 
             // TODO => send email
             return Result.Success();
@@ -268,42 +268,65 @@ public class AuthService(
 
     public async Task<Result> ConfirmEmailAsync(ConfirmEmailRequest request)
     {
-         var user = await _userManager.FindByIdAsync(request.UserId);
+        var user = await _userManager.FindByIdAsync(request.UserId);
 
-         if (user is null)
-             return Result.Failure(UserErrors.InvalidCode);
+        if (user is null)
+            return Result.Failure(UserErrors.InvalidCode);
 
-         if(user.EmailConfirmed)
-             return Result.Failure(UserErrors.DuplicatedConfirmation);
+        if (user.EmailConfirmed)
+            return Result.Failure(UserErrors.DuplicatedConfirmation);
 
         var code = request.Code;
 
         try
         {
-          // decode Decodes the Base64 URL-encoded string to its raw byte array then Converts the byte array back into a readable string
+            // decode Decodes the Base64 URL-encoded string to its raw byte array then Converts the byte array back into a readable string
             code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Code));
         }
-        catch(FormatException)
+        catch (FormatException)
         {
             return Result.Failure(UserErrors.InvalidCode);
         }
 
         var result = await _userManager.ConfirmEmailAsync(user, code); // this method update the emailConfirmed field to true in the database for this user to enable the user make login
 
-        if(result.Succeeded)
+        if (result.Succeeded)
             return Result.Success();
 
         var error = result.Errors.First();
 
         return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
-        
-     }
 
+    }
+
+    // if the email is not send to the user because of any problem  the user will use this method 
+    // we will send the email again
+    public async Task<Result> ResendConfirmationEmailAsync(ResendConfirmationEmailRequest request)
+    {
+        var user = await _userManager.FindByEmailAsync(request.Email);
+
+        if (user is null)
+            return Result.Success();     // if there is no user we dont send the email but we return success 
+
+
+        if (user.EmailConfirmed)
+            return Result.Failure(UserErrors.DuplicatedConfirmation);
+
+        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+        _logger.LogInformation("confirmation code :{code}", code);
+
+        // TODO => send email
+
+        return Result.Success();
+
+    }
 
     private string GenerateRefreshToke()
     {
         return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
     }
 
-   
+
 }
