@@ -50,6 +50,58 @@ public class AuthService(UserManager<ApplicationUser> userManager, IJwtProvider 
     }
 
 
+    public async Task<Result<AuthResponse>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
+    {
+        //1- check for existing email
+        var isExistingEmail = await _userManager.Users.AnyAsync(x => x.Email == request.Email, cancellationToken);
+
+        if (isExistingEmail)
+            return Result.Failure<AuthResponse>(UserErrors.DuplicatedEmail);
+
+        //2- create user
+
+        var user = new ApplicationUser
+        {
+            Email = request.Email,
+            UserName = request.Email,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+        };
+
+        var result = await _userManager.CreateAsync(user, request.Password);
+
+        if (result.Succeeded)
+        {
+            // generate a new token and refresh token
+
+            (string newToken, int expiresIn) = _jwtProvider.GenerateToken(user);
+
+            // generate refresh token
+
+            var newRefreshToken = GenerateRefreshToke();
+            var refreshTokenExpiration = DateTime.UtcNow.AddDays(_RefreshTokenExpirationInDays);
+
+            user.RefreshTokens.Add(new RefreshToken
+            {
+                Token = newRefreshToken,
+                ExpiresOn = refreshTokenExpiration
+            });
+
+            await _userManager.UpdateAsync(user);
+
+            // return AuthResponse
+
+            var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, newToken, expiresIn * 60, newRefreshToken, refreshTokenExpiration);
+
+            return Result.Success<AuthResponse>(response);
+
+        }
+
+        var error = result.Errors.First();
+
+        return Result.Failure<AuthResponse>(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+    }
+
     public async Task<Result<AuthResponse>> GetRefreshTokenAsync(string Token, string RefreshToken, CancellationToken cancellationToken = default)
     {
         var userId = _jwtProvider.ValidateToken(Token);
@@ -117,23 +169,6 @@ public class AuthService(UserManager<ApplicationUser> userManager, IJwtProvider 
     }
 
 
-    public async Task<Result> AddUserAsync(RegisterRequest request, CancellationToken cancellationToken = default)
-    {
-        var user = new ApplicationUser
-        {
-            Email = request.Email,
-            UserName = request.Email,
-            FirstName = request.FirstName,
-            LastName = request.LastName
-        };
-
-        var result = await _userManager.CreateAsync(user, request.Password);
-
-        if (result.Succeeded)
-            return Result.Success();
-
-        return Result.Failure(new Error(result.Errors.FirstOrDefault().Code, result.Errors.FirstOrDefault().Description, null));
-    }
 
 
     private string GenerateRefreshToke()

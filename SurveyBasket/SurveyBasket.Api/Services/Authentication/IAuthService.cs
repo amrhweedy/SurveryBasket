@@ -8,10 +8,10 @@ public interface IAuthService
 
     //Task<OneOf<AuthResponse, Error>> GetTokenAsync(string email, string password, CancellationToken cancellationToken = default); // we can use OneOf package instead of Result class
 
+    Task<Result<AuthResponse>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default);
+
     Task<Result<AuthResponse>> GetRefreshTokenAsync(string Token, string RefreshToken, CancellationToken cancellationToken = default);
 
     Task<Result> RevokeTokenAsync(string Token, string RefreshToken, CancellationToken cancellationToken = default);
 
-
-    Task<Result> AddUserAsync(RegisterRequest request, CancellationToken cancellationToken = default);
 }
