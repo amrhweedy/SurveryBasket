@@ -74,6 +74,23 @@ public class AuthController(IAuthService authService,
         return authResult.IsSuccess ? Ok() : authResult.ToProblem();
     }
 
+
+    // after the user cliked on the link in the email to confirm the email, we will call this endpoint to confirm the email
+    // to enable the user to make login
+
+    [HttpPost("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
+    {
+        var result = await _authService.ConfirmEmailAsync(request);
+
+        return result.IsSuccess ? Ok() : result.ToProblem();
+    }
+
+
+
+
+
+
     [HttpGet("TestOptionsPattern")]
     public async Task<IActionResult> Test()
     {
