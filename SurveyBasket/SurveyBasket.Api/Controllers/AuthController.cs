@@ -32,12 +32,25 @@ public class AuthController(IAuthService authService,
     }
 
 
+
+    #region normal register , create token and refresh token after the user registers
+
+    //[HttpPost("register")]
+    //public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
+    //{
+    //    var result = await _authService.RegisterAsync(request, cancellationToken);
+
+    //    return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    //}
+    #endregion
+
+
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
     {
         var result = await _authService.RegisterAsync(request, cancellationToken);
 
-        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+        return result.IsSuccess ? Ok() : result.ToProblem();
     }
 
 
