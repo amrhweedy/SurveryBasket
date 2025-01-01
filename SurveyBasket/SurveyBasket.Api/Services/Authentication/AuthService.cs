@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.WebUtilities;
+﻿using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.WebUtilities;
 using SurveyBasket.Api.Authentication;
 using SurveyBasket.Api.Contracts.Authentication;
+using SurveyBasket.Api.Helpers;
 using System.Security.Cryptography;
 using System.Text;
+using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace SurveyBasket.Api.Services.Authentication;
 
@@ -10,13 +13,17 @@ public class AuthService(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
     IJwtProvider jwtProvider,
-    ILogger<AuthService> logger) : IAuthService
+    ILogger<AuthService> logger,
+    IEmailSender emailSender,
+    IHttpContextAccessor httpContextAccessor
+    ) : IAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
     private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
     private readonly IJwtProvider _jwtProvider = jwtProvider;
     private readonly ILogger<AuthService> _logger = logger;
-
+    private readonly IEmailSender _emailSender = emailSender;
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
     private readonly int _RefreshTokenExpirationInDays = 14;
 
     #region the normal login without verification code and Email Confirmation
@@ -184,12 +191,16 @@ public class AuthService(
         if (result.Succeeded)
         {
             // generate a verification code
-            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);  //  this method creates a unique code
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));  //  encode the code to add the code in th url as a query string , the code will be a part of the url or link which will be send to the user
 
             _logger.LogInformation("confirmation code :{code}", code);
 
             // TODO => send email
+
+           
+            await SendConfirmationEmail(user, code);
+
             return Result.Success();
 
         }
@@ -319,6 +330,9 @@ public class AuthService(
 
         // TODO => send email
 
+        await SendConfirmationEmail(user, code);
+
+
         return Result.Success();
 
     }
@@ -328,5 +342,22 @@ public class AuthService(
         return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
     }
 
+    private async Task SendConfirmationEmail(ApplicationUser user, string code)
+    {
+        // origin => the url of the client (frontend) like http://localhost:4200
+        // the clint must tell me the route of the confirmation page (auth/emailconfirmatinon), when the user will click on the link it will redirect to this url $"{origin}/auth/emailConfirmatin?userId={user.Id}&code={code}"
+
+        var origin = _httpContextAccessor.HttpContext!.Request.Headers.Origin;
+
+        var emailBody = EmailBodyBuilder.GenerateEmailBody("EmailConfirmation",
+            new Dictionary<string, string>
+            {
+                {"{{name}}" , user.FirstName },
+                { "{{action_url}}" , $"{origin}/auth/emailConfirmatin?userId={user.Id}&code={code}"}
+            }
+      );
+
+        await _emailSender.SendEmailAsync(user.Email!, "survey basket : email confirmation", emailBody);
+    }
 
 }

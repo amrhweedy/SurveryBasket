@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.IdentityModel.Tokens;
 using SurveyBasket.Api.Authentication;
 using SurveyBasket.Api.Services.Authentication;
 using SurveyBasket.Api.Services.Cashing;
+using SurveyBasket.Api.Services.Emails;
 using SurveyBasket.Api.Services.Results;
 using SurveyBasket.Api.Services.Votes;
 using SurveyBasket.Api.Settings;
@@ -55,6 +57,10 @@ public static class DependencyInjection
         services.AddScoped<IVoteService, VoteService>();
         services.AddScoped<IResultService, ResultService>();
         services.AddScoped<ICacheService, CacheService>();
+        services.AddScoped<IEmailSender, EmailService>();
+
+
+        services.AddHttpContextAccessor();
 
         // FluentValidation
         services.AddFluentValidationConfig();
