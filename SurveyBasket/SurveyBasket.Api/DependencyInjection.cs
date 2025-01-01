@@ -5,6 +5,7 @@ using SurveyBasket.Api.Services.Authentication;
 using SurveyBasket.Api.Services.Cashing;
 using SurveyBasket.Api.Services.Results;
 using SurveyBasket.Api.Services.Votes;
+using SurveyBasket.Api.Settings;
 using System.Text;
 
 namespace SurveyBasket.Api;
@@ -67,6 +68,9 @@ public static class DependencyInjection
         // Exception Handling
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
+
+        // Mail Settings Configuration => IOptions<MailSettings>
+        services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
 
         return services;
     }
