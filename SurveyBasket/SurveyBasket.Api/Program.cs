@@ -1,3 +1,5 @@
+using Hangfire;
+using HangfireBasicAuthenticationFilter;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +36,17 @@ app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();  // to redirect http to https, it means if i use http it will redirect to https
 
+app.UseHangfireDashboard("/jobs", new DashboardOptions()
+{
+    // if we need to make authentication for the dashboard install package Hangfire.Dashboard.Basic.Authentication
+    Authorization = [
+        new HangfireCustomBasicAuthenticationFilter{
+            User = builder.Configuration.GetValue<string>("HangfireSettings:Username"),
+            Pass = builder.Configuration.GetValue<string>("HangfireSettings:Password")
+        }
+        ],
+    DashboardTitle = "Survey Basket Dashboard", // change the title of the dashboard
+});
 
 app.UseCors();  // it must come before the authentication 
 

@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity.UI.Services;
+﻿using Hangfire;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using SurveyBasket.Api.Authentication;
 using SurveyBasket.Api.Contracts.Authentication;
 using SurveyBasket.Api.Helpers;
 using System.Security.Cryptography;
 using System.Text;
-using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace SurveyBasket.Api.Services.Authentication;
 
@@ -198,7 +198,7 @@ public class AuthService(
 
             // TODO => send email
 
-           
+
             await SendConfirmationEmail(user, code);
 
             return Result.Success();
@@ -332,7 +332,6 @@ public class AuthService(
 
         await SendConfirmationEmail(user, code);
 
-
         return Result.Success();
 
     }
@@ -357,7 +356,12 @@ public class AuthService(
             }
       );
 
-        await _emailSender.SendEmailAsync(user.Email!, "survey basket : email confirmation", emailBody);
+        // Enqueue => This method is used to schedule a background job that should run immediately or as soon as resources allow.
+        // jobs enqueued with Enqueue run only once and do not require additional triggers. the job will be executed as soon as it is added to the queue and will not be executed again automatically
+        //This job will be added to the Hangfire queue and executed asynchronously, leaving the main thread free to continue handling other requests.
+        BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email!, "survey basket : email confirmation", emailBody));
+
+        await Task.CompletedTask;
     }
 
 }

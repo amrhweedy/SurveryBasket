@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Hangfire;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.IdentityModel.Tokens;
 using SurveyBasket.Api.Authentication;
@@ -75,8 +76,12 @@ public static class DependencyInjection
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
 
+        // HangFire
+        services.AddHangfireConfig(configuration);
+
         // Mail Settings Configuration => IOptions<MailSettings>
         services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
+
 
         return services;
     }
@@ -179,5 +184,18 @@ public static class DependencyInjection
         return services;
     }
 
+    private static IServiceCollection AddHangfireConfig(this IServiceCollection services, IConfiguration Configuration)
+    {
+        services.AddHangfire(config => config
+        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+        .UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings()
+        .UseSqlServerStorage(Configuration.GetConnectionString("DefaultConnection")));
+
+        services.AddHangfireServer();
+
+        return services;
+
+    }
 
 }
