@@ -1,6 +1,7 @@
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
 using Serilog;
+using SurveyBasket.Api.Services.BackgroundJobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,7 @@ if (app.Environment.IsDevelopment())  // it knows that we are in development mod
     app.UseSwaggerUI();
 }
 
+
 app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();  // to redirect http to https, it means if i use http it will redirect to https
@@ -46,7 +48,29 @@ app.UseHangfireDashboard("/jobs", new DashboardOptions()
         }
         ],
     DashboardTitle = "Survey Basket Dashboard", // change the title of the dashboard
+
+    // now i can go to the dashboard and select any job and run it manually or delete it 
+    // so if need to make all these jobs readonly we can use the IsReadOnlyFunc property
+    // so i can not delete or run any job manually
+
+    // IsReadOnlyFunc = (DashboardContext context)=> true,
 });
+
+// configure Recurring Job
+
+//var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+//using var scope = scopeFactory.CreateScope();
+//var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+//RecurringJob.AddOrUpdate("SendNewPollsNotification", () => notificationService.SendNewPollsNotification(null), Cron.Daily);
+
+// this job will run every day at 12:00 am
+// if we to run the job at a specific time we can use the expression 
+// https://crontab.guru/  => this site will help us to generate the cron expression 
+// we put the job in the program because when we run the appliction this job will be added to the RecurringJobs
+// and when we open the dashboard we can select this job and run it manually now
+
+RecurringJob.AddOrUpdate<INotificationService>("SendNewPollsNotification", x => x.SendNewPollsNotification(null), Cron.Daily);
+
 
 app.UseCors();  // it must come before the authentication 
 

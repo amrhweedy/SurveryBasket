@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.IdentityModel.Tokens;
 using SurveyBasket.Api.Authentication;
 using SurveyBasket.Api.Services.Authentication;
+using SurveyBasket.Api.Services.BackgroundJobs;
 using SurveyBasket.Api.Services.Cashing;
 using SurveyBasket.Api.Services.Emails;
 using SurveyBasket.Api.Services.Results;
@@ -59,6 +60,7 @@ public static class DependencyInjection
         services.AddScoped<IResultService, ResultService>();
         services.AddScoped<ICacheService, CacheService>();
         services.AddScoped<IEmailSender, EmailService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
 
         services.AddHttpContextAccessor();
