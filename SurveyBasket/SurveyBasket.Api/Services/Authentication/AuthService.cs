@@ -299,7 +299,9 @@ public class AuthService(
             return Result.Failure(UserErrors.InvalidCode);
         }
 
-        var result = await _userManager.ConfirmEmailAsync(user, code); // this method update the emailConfirmed field to true in the database for this user to enable the user make login
+        // ConfirmEmailAsync => validate the code with the user then if the code is valid
+        // it will update the emailConfirmed field to true in the database for this user to enable the user make login
+        var result = await _userManager.ConfirmEmailAsync(user, code);
 
         if (result.Succeeded)
             return Result.Success();
@@ -328,13 +330,73 @@ public class AuthService(
 
         _logger.LogInformation("confirmation code :{code}", code);
 
-        // TODO => send email
-
         await SendConfirmationEmail(user, code);
 
         return Result.Success();
 
     }
+
+
+    public async Task<Result> SendResetPasswordCodeAsync(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return Result.Success();
+            // this is misleading for the users, because we dont need to know the user if this email exists or not because maybe the user is hacker and try to get the password of another user
+            // so if this hacker send invalid email and I respond with error this email not exist then the hacker will try to send another email and so on 
+            // so if the email does not exist i will respond with success and i will not send email to the user because i dont want to expose the fact that this email does not exist
+        }
+
+        if (!user.EmailConfirmed)
+            return Result.Failure(UserErrors.EmailNotConfirmed);
+
+        // generate a verification code 
+
+
+        var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+        _logger.LogInformation("Reset Password Code :{code}", code);
+
+        await SendResetPasswordEmail(user, code);
+
+        return Result.Success();
+    }
+
+    public async Task<Result> ResetPasswordAsync(ResetPasswordRequest request)
+    {
+        var user = await _userManager.FindByEmailAsync(request.Email);
+
+        if (user is null || !user.EmailConfirmed)
+            return Result.Failure(UserErrors.InvalidCode);
+
+        IdentityResult result;
+        try
+        {
+            var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Code));
+
+            // ResetPasswordAsync =>validates the code (reset password token). If the token is invalid (e.g., expired, tampered, or mismatched), the method will return an IdentityResult with an error indicating that the token is invalid.
+            // it validated the code (correctly formatted, tied to the user, and not expired ) 
+            // and The code must match the one generated and sent during the password reset process.
+
+            result = await _userManager.ResetPasswordAsync(user, code, request.NewPassword);
+        }
+        catch (FormatException)
+        {
+            // it enters here when the code is not corrected format
+            // but if the code is correctly formatted but it is not valid (e.g., expired, tampered, or mismatched), it will not enter inside the catch but  the method will return an IdentityResult with an error indicating that the token is invalid.
+            result = IdentityResult.Failed(_userManager.ErrorDescriber.InvalidToken());
+        }
+
+        if (result.Succeeded)
+            return Result.Success();
+
+        var error = result.Errors.First();
+
+        return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status401Unauthorized));
+    }
+
 
     private string GenerateRefreshToke()
     {
@@ -363,5 +425,30 @@ public class AuthService(
 
         await Task.CompletedTask;
     }
+
+
+    private async Task SendResetPasswordEmail(ApplicationUser user, string code)
+    {
+        // origin => the url of the client (frontend) like http://localhost:4200
+        // the clint must tell me the route of the confirmation page (auth/forgetPassword), when the user will click on the link it will redirect to this url $"{origin}/auth/forgetPassword?emial={user.Email}&code={code}"
+
+        var origin = _httpContextAccessor.HttpContext!.Request.Headers.Origin;
+
+        var emailBody = EmailBodyBuilder.GenerateEmailBody("ForgetPassword",
+            new Dictionary<string, string>
+            {
+                {"{{name}}" , user.FirstName },
+                {"{{action_url}}" , $"{origin}/auth/forgetPassword?email={user.Email}&code={code}"}
+            }
+      );
+
+        // Enqueue => This method is used to schedule a background job that should run immediately or as soon as resources allow.
+        // jobs enqueued with Enqueue run only once and do not require additional triggers. the job will be executed as soon as it is added to the queue and will not be executed again automatically
+        // This job will be added to the Hangfire queue and executed asynchronously, leaving the main thread free to continue handling other requests.
+        BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email!, "✔ survey basket : change password", emailBody));
+
+        await Task.CompletedTask;
+    }
+
 
 }
