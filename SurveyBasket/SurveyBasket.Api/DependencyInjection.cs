@@ -1,4 +1,5 @@
-﻿using Hangfire;
+﻿using System.Text;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.IdentityModel.Tokens;
@@ -11,7 +12,6 @@ using SurveyBasket.Api.Services.Results;
 using SurveyBasket.Api.Services.Users;
 using SurveyBasket.Api.Services.Votes;
 using SurveyBasket.Api.Settings;
-using System.Text;
 
 namespace SurveyBasket.Api;
 
@@ -123,7 +123,7 @@ public static class DependencyInjection
     {
         // configure the identity
 
-        services.AddIdentity<ApplicationUser, IdentityRole>()
+        services.AddIdentity<ApplicationUser, ApplicationRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 

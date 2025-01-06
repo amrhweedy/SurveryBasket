@@ -1,4 +1,6 @@
 ﻿
+using SurveyBasket.Api.Abstractions.Consts;
+
 namespace SurveyBasket.Api.Persistence.EntitiesConfiguration;
 
 public class UserConfiguration : IEntityTypeConfiguration<ApplicationUser>
@@ -13,5 +15,23 @@ public class UserConfiguration : IEntityTypeConfiguration<ApplicationUser>
             .WithOwner()
             .HasForeignKey("UserId");   // we change the foreign key name form ApplicationUserId to UserId
 
+        // seeding data
+
+        var passwordHasher = new PasswordHasher<ApplicationUser>();
+
+        builder.HasData(new ApplicationUser
+        {
+            Id = DefaultUsers.AdminId,
+            Email = DefaultUsers.AdminEmail,
+            NormalizedEmail = DefaultUsers.AdminEmail.ToUpper(),
+            UserName = DefaultUsers.AdminEmail,
+            NormalizedUserName = DefaultUsers.AdminEmail.ToUpper(),
+            FirstName = "Amr",
+            LastName = "Hweedy",
+            SecurityStamp = DefaultUsers.AdminSecurityStamp,
+            ConcurrencyStamp = DefaultUsers.AdminConcurrencyStamp,
+            EmailConfirmed = true, // to enable admin to login
+            PasswordHash = passwordHasher.HashPassword(null!, DefaultUsers.AdminPassword),
+        });
     }
 }
