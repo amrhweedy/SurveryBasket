@@ -16,7 +16,8 @@ public class AuthService(
     IJwtProvider jwtProvider,
     ILogger<AuthService> logger,
     IEmailSender emailSender,
-    IHttpContextAccessor httpContextAccessor
+    IHttpContextAccessor httpContextAccessor,
+    ApplicationDbContext context
     ) : IAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
@@ -25,6 +26,7 @@ public class AuthService(
     private readonly ILogger<AuthService> _logger = logger;
     private readonly IEmailSender _emailSender = emailSender;
     private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    private readonly ApplicationDbContext _context = context;
     private readonly int _RefreshTokenExpirationInDays = 14;
 
     #region the normal login without verification code and Email Confirmation
@@ -85,9 +87,13 @@ public class AuthService(
 
         if (result.Succeeded)
         {
+
+            // get the user roles and permissions
+            var (userRoles, userPermissions) = await GetUserRolesAndPermsissionsAsync(user, cancellationToken);
+
             // generate jwt token
 
-            (string token, int expiresIn) = _jwtProvider.GenerateToken(user);
+            (string token, int expiresIn) = _jwtProvider.GenerateToken(user, userRoles, userPermissions);
 
             // generate refresh token
 
@@ -230,9 +236,14 @@ public class AuthService(
         userRefreshToken.RevokedOn = DateTime.UtcNow; // Revoke the old refresh token because the refresh token is used once time only 
 
 
+
+        // get the user roles and permissions
+
+        (var userRoles, var userPermissions) = await GetUserRolesAndPermsissionsAsync(user, cancellationToken);
+
         // generate a new token and refresh token
 
-        (string newToken, int expiresIn) = _jwtProvider.GenerateToken(user);
+        (string newToken, int expiresIn) = _jwtProvider.GenerateToken(user, userRoles, userPermissions);
 
         // generate refresh token
 
@@ -455,5 +466,36 @@ public class AuthService(
         await Task.CompletedTask;
     }
 
+
+    private async Task<(IEnumerable<string> roles, IEnumerable<string> permissions)> GetUserRolesAndPermsissionsAsync(ApplicationUser user, CancellationToken cancellationToken)
+    {
+        var userRoles = await _userManager.GetRolesAsync(user);
+
+        //we can use RoleManager to get the permissinons but if the user have 10 roles we will loop for the userRoles and get the permissions for each role so we will go to the database 10 times (bad performace)
+        // so we use the EF core and context to make one query to get all the permissions for all the userRoles
+
+        //var userPermissions = await _context.Roles
+        //    .Join(_context.RoleClaims,
+        //         role => role.Id,
+        //         roleClaim => roleClaim.RoleId,
+        //         (role, roleClaim) => new { role, roleClaim }
+        //         )
+        //          .Where(x => userRoles.Contains(x.role.Name!))
+        //          .Select(x => x.roleClaim.ClaimValue)
+        //          .Distinct()
+        //          .ToListAsync(cancellationToken);
+
+        // or
+        var userPermissions = await (from role in _context.Roles
+                                     join roleClaim in _context.RoleClaims
+                                     on role.Id equals roleClaim.RoleId
+                                     where userRoles.Contains(role.Name!)
+                                     select roleClaim.ClaimValue)
+                               .Distinct()
+                               .ToListAsync(cancellationToken);
+
+
+        return (userRoles, userPermissions!);
+    }
 
 }

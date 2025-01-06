@@ -1,9 +1,10 @@
 ﻿
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 namespace SurveyBasket.Api.Authentication;
 
@@ -11,7 +12,7 @@ public class JwtProvider(IOptions<JwtOptions> jwtOptions) : IJwtProvider
 {
     private readonly JwtOptions _jwtOptions = jwtOptions.Value;
 
-    public (string token, int expiresIn) GenerateToken(ApplicationUser user)
+    public (string token, int expiresIn) GenerateToken(ApplicationUser user, IEnumerable<string> roles, IEnumerable<string> permissions)
     {
         Claim[] claims = [
 
@@ -19,8 +20,13 @@ public class JwtProvider(IOptions<JwtOptions> jwtOptions) : IJwtProvider
             new Claim(JwtRegisteredClaimNames.Email, user.Email!),
             new Claim(JwtRegisteredClaimNames.GivenName, user.FirstName),
             new Claim(JwtRegisteredClaimNames.FamilyName, user.LastName),
-            new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString())
-            ];
+            new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
+            new Claim(nameof(roles) , JsonSerializer.Serialize(roles),JsonClaimValueTypes.JsonArray), // JsonClaimValueTypes.JsonArray => to make roles and permissions array of string not plain text
+            new Claim(nameof(permissions) , JsonSerializer.Serialize(permissions),JsonClaimValueTypes.JsonArray)
+
+            //new Claim(nameof(roles) , string.Join(",",roles)),  // the roles and permissions will be a string like this "admin,member"
+            //new Claim(nameof(permissions) , string.Join(",",permissions)),
+             ];
 
 
         // this key is responsible for encoding and decoding the token, it's a secret key
