@@ -1,11 +1,12 @@
-﻿using Hangfire;
+﻿using System.Security.Cryptography;
+using System.Text;
+using Hangfire;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
+using SurveyBasket.Api.Abstractions.Consts;
 using SurveyBasket.Api.Authentication;
 using SurveyBasket.Api.Contracts.Authentication;
 using SurveyBasket.Api.Helpers;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace SurveyBasket.Api.Services.Authentication;
 
@@ -304,7 +305,11 @@ public class AuthService(
         var result = await _userManager.ConfirmEmailAsync(user, code);
 
         if (result.Succeeded)
+        {
+            // assign the user to the member role after the email is confirmed
+            await _userManager.AddToRoleAsync(user, DefaultRoles.Member);
             return Result.Success();
+        }
 
         var error = result.Errors.First();
 
