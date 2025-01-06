@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Hangfire;
+﻿using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.IdentityModel.Tokens;
@@ -12,6 +11,7 @@ using SurveyBasket.Api.Services.Results;
 using SurveyBasket.Api.Services.Users;
 using SurveyBasket.Api.Services.Votes;
 using SurveyBasket.Api.Settings;
+using System.Text;
 
 namespace SurveyBasket.Api;
 
@@ -126,6 +126,10 @@ public static class DependencyInjection
         services.AddIdentity<ApplicationUser, ApplicationRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+
+
+        services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddTransient<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
 
 
         // The JwtProvider likely does not maintain any per - user or per-request state; it simply generates JWT tokens based on the input(ApplicationUser).
