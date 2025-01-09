@@ -8,6 +8,7 @@ using SurveyBasket.Api.Services.BackgroundJobs;
 using SurveyBasket.Api.Services.Cashing;
 using SurveyBasket.Api.Services.Emails;
 using SurveyBasket.Api.Services.Results;
+using SurveyBasket.Api.Services.Roles;
 using SurveyBasket.Api.Services.Users;
 using SurveyBasket.Api.Services.Votes;
 using SurveyBasket.Api.Settings;
@@ -63,6 +64,7 @@ public static class DependencyInjection
         services.AddScoped<IEmailSender, EmailService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IRoleService, RoleService>();
 
 
         services.AddHttpContextAccessor();
