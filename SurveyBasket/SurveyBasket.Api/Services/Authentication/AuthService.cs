@@ -1,12 +1,11 @@
-﻿using System.Security.Cryptography;
-using System.Text;
-using Hangfire;
+﻿using Hangfire;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
-using SurveyBasket.Api.Abstractions.Consts;
 using SurveyBasket.Api.Authentication;
 using SurveyBasket.Api.Contracts.Authentication;
 using SurveyBasket.Api.Helpers;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace SurveyBasket.Api.Services.Authentication;
 
@@ -72,7 +71,8 @@ public class AuthService(
 
 
     // login with Verification Code and Email Confirmation 
-    // we here check if email is confirmed or not using PasswordSignInAsync method 
+    // we here check if email is confirmed or not using PasswordSignInAsync method
+    // GetTokenAsync = login
     public async Task<Result<AuthResponse>> GetTokenAsync(string Email, string Password, CancellationToken cancellationToken = default)
     {
         // get user
@@ -81,9 +81,13 @@ public class AuthService(
         if (user is null)
             return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
-        // check password
+        if (user.IsDisabled)
+            return Result.Failure<AuthResponse>(UserErrors.DisabledUser);
 
-        var result = await _signInManager.PasswordSignInAsync(user, Password, false, false);
+        // check password , we make lockoutOnFailutre = true to enable the lockout for the user
+        // if the user is locked and make login with valid credintals the app will give him error and the error is  UserErrors.LockedUser
+
+        var result = await _signInManager.PasswordSignInAsync(user, Password, false, true);
 
         if (result.Succeeded)
         {
@@ -115,8 +119,13 @@ public class AuthService(
             return Result.Success<AuthResponse>(response);
         }
 
+        var error = result.IsNotAllowed
+            ? UserErrors.EmailNotConfirmed
+            : result.IsLockedOut
+            ? UserErrors.LockedUser
+            : UserErrors.InvalidCredentials;
 
-        return Result.Failure<AuthResponse>(result.IsNotAllowed ? UserErrors.EmailNotConfirmed : UserErrors.InvalidCredentials);
+        return Result.Failure<AuthResponse>(error);
     }
 
 
@@ -227,6 +236,13 @@ public class AuthService(
         var user = await _userManager.FindByIdAsync(userId);
         if (user is null)
             return Result.Failure<AuthResponse>(UserErrors.InvalidJwtToken);
+
+        if (user.IsDisabled)
+            return Result.Failure<AuthResponse>(UserErrors.DisabledUser);
+
+        if (user.LockoutEnd > DateTime.UtcNow)
+            return Result.Failure<AuthResponse>(UserErrors.LockedUser);
+
 
         var userRefreshToken = user.RefreshTokens.SingleOrDefault(x => x.Token == RefreshToken && x.IsActive);
         if (userRefreshToken is null)

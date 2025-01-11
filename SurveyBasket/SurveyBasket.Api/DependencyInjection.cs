@@ -187,6 +187,12 @@ public static class DependencyInjection
             options.Password.RequiredLength = 8;
             options.SignIn.RequireConfirmedEmail = true;
             options.User.RequireUniqueEmail = true;
+
+            // Default Lockout settings we dont need to change it. to enbale the lock we need to make lockoutOnFailure = true when using the _signInManager.PasswordSignInAsync method in auth service
+
+            // options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+            // options.Lockout.MaxFailedAccessAttempts = 5;
+            // options.Lockout.AllowedForNewUsers = true;
         });
 
 

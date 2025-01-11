@@ -1,10 +1,10 @@
-﻿
-namespace SurveyBasket.Api.Entities;
+﻿namespace SurveyBasket.Api.Entities;
 
 public sealed class ApplicationUser : IdentityUser
 {
     public string FirstName { get; set; } = string.Empty;   // this means this prop in not-nullable if the firstName does not have a value it will take a default value ""
     public string LastName { get; set; } = string.Empty;
+    public bool IsDisabled { get; set; }
 
     public List<RefreshToken> RefreshTokens { get; set; } = [];
 
