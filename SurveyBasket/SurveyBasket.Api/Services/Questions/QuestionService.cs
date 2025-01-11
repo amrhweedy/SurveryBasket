@@ -1,35 +1,66 @@
 ﻿using SurveyBasket.Api.Contracts.Answers;
+using SurveyBasket.Api.Contracts.Common;
 using SurveyBasket.Api.Services.Cashing;
+using System.Linq.Dynamic.Core;
 
 namespace SurveyBasket.Api.Services.Questions;
 
-public class QuestionService(ApplicationDbContext context, ICacheService cacheService, ILogger<QuestionService> logger) : IQuestionService
+public class QuestionService(ApplicationDbContext context,
+    ICacheService cacheService,
+    ILogger<QuestionService> logger) : IQuestionService
 {
     private readonly ApplicationDbContext _context = context;
     private readonly ICacheService _cacheService = cacheService;
     private readonly ILogger<QuestionService> _logger = logger;
     private const string _cachePrefix = "AvailableQuestions";
 
-    public async Task<Result<IEnumerable<QuestionResponse>>> GetAllAsync(int pollId, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedList<QuestionResponse>>> GetAllAsync(int pollId, RequestFilters filters, CancellationToken cancellationToken = default)
     {
         var isExistingPoll = await _context.Polls.AnyAsync(p => p.Id == pollId, cancellationToken);
 
         if (!isExistingPoll)
-            return Result.Failure<IEnumerable<QuestionResponse>>(PollErrors.PollNotFound);
+            return Result.Failure<PaginatedList<QuestionResponse>>(PollErrors.PollNotFound);
 
-        var questions = await _context.Questions
-            .Where(q => q.PollId == pollId)
-            .Include(q => q.Answers)
-            //.Select(q => new QuestionResponse(               // we use select method to get a specific columns from the database , not all columns
-            //    q.Id,
-            //    q.Content,
-            //    q.Answers.Select(a => new AnswerResponse(a.Id, a.Content))
-            //    ))
-            .ProjectToType<QuestionResponse>()    // or use mapster to make the mapping and select the specific columns from the database, it will map every question to QuestionResponse 
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
+        var query = _context.Questions
+            .Where(q => q.PollId == pollId);
 
-        return Result.Success<IEnumerable<QuestionResponse>>(questions);
+        if (!string.IsNullOrEmpty(filters.SearchValue))
+        {
+            query = query.Where(q => q.Content.Contains(filters.SearchValue));
+        }
+
+        if (!string.IsNullOrEmpty(filters.SortColumn))
+        {   // using package system.linq.dynamic.core (notion)
+            //System.Linq.Dynamic.Core is a powerful library in .NET that extends LINQ by allowing you to construct LINQ queries dynamically at runtime using string expressions.
+            //It is particularly useful when you need to define query expressions dynamically
+            //such as when building queries based on user input or when working with scenarios where query logic isn't fixed at compile time.
+
+            query = query.OrderBy($"{filters.SortColumn} {filters.SortDirection}");  // like query.OrderBy("Name DESC")
+        }
+
+        var source = query
+             .Include(q => q.Answers)
+             .ProjectToType<QuestionResponse>()
+             .AsNoTracking();
+
+        var questions = await PaginatedList<QuestionResponse>.CreateAsync(source, filters.PageNumber, filters.PageSize);
+
+        return Result.Success(questions);
+
+
+        #region query with using select not mapster
+
+        //var query = _context.Questions
+        //    .Where(q => q.PollId == pollId )
+        //    .Include(q => q.Answers)
+        //    .Select(q => new QuestionResponse(               // we use select method to get a specific columns from the database , not all columns
+        //        q.Id,
+        //        q.Content,
+        //        q.Answers.Select(a => new AnswerResponse(a.Id, a.Content))
+        //        ))
+        //    .AsNoTracking();
+
+        #endregion
     }
 
     // we need here to get the available questions with answers for the specific poll to make the user votes on this poll (vote on every question inside this poll)
