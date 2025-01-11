@@ -88,6 +88,10 @@ public static class DependencyInjection
         // Mail Settings Configuration => IOptions<MailSettings>
         services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
 
+        // add healthe check service
+        services.AddHealthChecks()
+            .AddSqlServer(name: "Database", connectionString: connectionString);
+
 
         return services;
     }

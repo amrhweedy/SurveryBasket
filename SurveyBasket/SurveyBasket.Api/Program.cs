@@ -1,5 +1,7 @@
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
 using SurveyBasket.Api.Services.BackgroundJobs;
 
@@ -79,6 +81,14 @@ app.UseAuthorization();
 app.MapControllers(); //scans all controllers in the application and collects the routes defined in those controllers. When a request is sent, the routing system will match the request URL to one of the collected routes, and then direct the request to the appropriate controller and action that handles that route.
 
 app.UseExceptionHandler();
+
+//HealthCheckOptions => it displays the health of the application and its dependencies like the database in a readable format like json
+// and gives information about the status of every dependency like the database
+// when you visit http://localhost:5000/health, it will return the status of all health checks (like database connections, etc.), and that information will be formatted for the
+app.MapHealthChecks("health", new HealthCheckOptions
+{
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
 
 app.Run();
 

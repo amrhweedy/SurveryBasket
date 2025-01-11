@@ -1,9 +1,4 @@
-﻿
-
-using SurveyBasket.Api.Abstractions.Consts;
-using SurveyBasket.Api.Authentication.Filters;
-
-namespace SurveyBasket.Api.Controllers;
+﻿namespace SurveyBasket.Api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 //[Authorize]  // it means that the user must be authenticated (have a valid token) to access any endpoint in this controller
