@@ -168,6 +168,18 @@ public class AuthController(IAuthService authService,
         Thread.Sleep(10000);
         return Ok();
     }
+
+
+    [HttpGet("test-fixed-window-limiter")]
+    [EnableRateLimiting("fixedWindowLimiter")]
+    public IActionResult TestFixedWindowLimiter()
+    {
+        // we make sleep for 10 seconds because i need to send 4 requests at the same time and every request will sleep for 10 seconds before the reponse will be returned
+        // so the first and second request will sleep for 10 seconds and executed after the 10 seconds  but the third will be put in the queue unitl the window time will be over 20 seconds and then the third will be executed
+        // and the fourth will be rejected and give a 429 status code (too many requests) becuuse the queue is full becuase the queue size is 1 and the rate limit is 2
+        Thread.Sleep(10000);
+        return Ok();
+    }
 }
 
 

@@ -136,10 +136,10 @@ public static class DependencyInjection
             {
                 tokenLimiterOptions.TokenLimit = 2;  //maximum number of tokens that can be existed in the bucket
 
-                //maximum number of requests that can be queued (wait in line) while waiting until the bucket has more tokens.
-                //In this case, if the token limit is 2 and ther are more 4 requests come at the same time, the firt 2 requests take the 2 tokens that in the bucket and the buecket will be empty of tokens after these 2 requests.
+                // maximum number of requests that can be queued (wait in line) while waiting until the bucket has more tokens.
+                // In this case, if the token limit is 2 and ther are more 4 requests come at the same time, the firt 2 requests take the 2 tokens that in the bucket and the buecket will be empty of tokens after these 2 requests.
                 // the third request will wait int the queue until there are tokens again in the bucket
-                //  the fourth request will be rejected(returning HTTP 429 status code). because the max size of the queue is 1 and the max size of the bucket is 2
+                // the fourth request will be rejected(returning HTTP 429 status code). because the max size of the queue is 1 and the max size of the bucket is 2
                 tokenLimiterOptions.QueueLimit = 1;
                 tokenLimiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst; //the oldest request in the queue will be processed first
 
@@ -151,6 +151,33 @@ public static class DependencyInjection
         }
 
        );
+
+
+
+        // Fixed Window Limiter
+
+        services.AddRateLimiter(rateLimiterOptions =>
+        {
+            // the default rejection status code is 503 (Service Unavailable). so we change it to 429 (Too Many Requests)
+            rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            rateLimiterOptions.AddFixedWindowLimiter("fixedWindowLimiter", fixedWindowlLimiterOptions =>
+            {
+                fixedWindowlLimiterOptions.PermitLimit = 2;  //maximum number of requests that can be processed or recieved throught 3 
+                fixedWindowlLimiterOptions.Window = TimeSpan.FromSeconds(20); // it means we can handle or recieve 2 requests in 20 seconds
+
+                // maximum number of requests that can be queued (wait in line) until the window time is finished, unitl the 20 seconds is over then the request which is in the queue will be processed
+                // In this case, if the PermitLimit is 2 and ther are more 4 requests come at the same time, the firt 2 requests will be processed
+                // the third request will wait int the queue until the window time is over , until the 20 seconds is over
+                // the fourth request will be rejected(returning HTTP 429 status code). because the max size of the queue is 1 and the max size of the permit limit is 2
+                fixedWindowlLimiterOptions.QueueLimit = 1;
+                fixedWindowlLimiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst; //the oldest request in the queue will be processed first
+
+            });
+        }
+
+       );
+
 
 
         return services;
