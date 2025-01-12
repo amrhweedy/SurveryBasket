@@ -156,6 +156,18 @@ public class AuthController(IAuthService authService,
         Thread.Sleep(10000);
         return Ok();
     }
+
+
+    [HttpGet("test-token-bucket-limiter")]
+    [EnableRateLimiting("tokenBucketLimiter")]
+    public IActionResult TestTokenBucketLimiter()
+    {
+        // we make sleep for 10 seconds because i need to send 4 requests at the same time and every request will sleep for 10 seconds before the reponse will be returned
+        // so the first and second request will sleep for 10 seconds and take the 2 tokens from the bucket and will be executed but the third will be put in the queue unitl the bucket will be full with 1 token at least and then the third will be executed
+        // and the fourth will be rejected and give a 429 status code (too many requests) becuuse the queue is full becuase the queue size is 1 and the rate limit is 2
+        Thread.Sleep(10000);
+        return Ok();
+    }
 }
 
 

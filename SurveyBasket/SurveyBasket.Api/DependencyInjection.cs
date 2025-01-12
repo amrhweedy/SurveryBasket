@@ -124,6 +124,35 @@ public static class DependencyInjection
        );
 
 
+
+        // Token Bucket Limiter
+
+        services.AddRateLimiter(rateLimiterOptions =>
+        {
+            // the default rejection status code is 503 (Service Unavailable). so we change it to 429 (Too Many Requests)
+            rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            rateLimiterOptions.AddTokenBucketLimiter("tokenBucketLimiter", tokenLimiterOptions =>
+            {
+                tokenLimiterOptions.TokenLimit = 2;  //maximum number of tokens that can be existed in the bucket
+
+                //maximum number of requests that can be queued (wait in line) while waiting until the bucket has more tokens.
+                //In this case, if the token limit is 2 and ther are more 4 requests come at the same time, the firt 2 requests take the 2 tokens that in the bucket and the buecket will be empty of tokens after these 2 requests.
+                // the third request will wait int the queue until there are tokens again in the bucket
+                //  the fourth request will be rejected(returning HTTP 429 status code). because the max size of the queue is 1 and the max size of the bucket is 2
+                tokenLimiterOptions.QueueLimit = 1;
+                tokenLimiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst; //the oldest request in the queue will be processed first
+
+                tokenLimiterOptions.ReplenishmentPeriod = TimeSpan.FromSeconds(30); // the bucket will be refilled every 30 seconds until the tokens in the bucket are reached to the max tokenlimit 2
+                tokenLimiterOptions.TokensPerPeriod = 1; // the bucket will be refilled with 1 tokens every 30 seconds unitl the tokens in the bucket are reached to the max tokenlimit 2
+                tokenLimiterOptions.AutoReplenishment = true;  // the bucket will be refilled automatically when the number of tokens in the bucked are less than the max token limit
+
+            });
+        }
+
+       );
+
+
         return services;
     }
 
