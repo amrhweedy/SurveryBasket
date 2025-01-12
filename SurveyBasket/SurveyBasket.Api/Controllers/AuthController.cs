@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Options;
 using SurveyBasket.Api.Authentication;
 using SurveyBasket.Api.Contracts.Authentication;
 using SurveyBasket.Api.Services.Authentication;
@@ -116,12 +117,6 @@ public class AuthController(IAuthService authService,
 
 
 
-
-
-
-
-
-
     [HttpGet("TestOptionsPattern")]
     public async Task<IActionResult> Test()
     {
@@ -148,6 +143,18 @@ public class AuthController(IAuthService authService,
             value2
         });
 
+    }
+
+
+    [HttpGet("test-concurrency-rate-limiting")]
+    [EnableRateLimiting("concurrency")]
+    public IActionResult TestConncurrencyRateLimiting()
+    {
+        // we make sleep for 10 seconds because i need to send 4 requests at the same time and every request will sleep for 10 seconds before the reponse will be returned
+        // so the first and second request will sleep for 10 seconds but will be executed but the third will be put in the queue unitl the first or second will be executed and then the third will be executed
+        // and the fourth will be rejected and give a 429 status code (too many requests) becuuse the queue is full becuase the queue size is 1 and the rate limit is 2
+        Thread.Sleep(10000);
+        return Ok();
     }
 }
 

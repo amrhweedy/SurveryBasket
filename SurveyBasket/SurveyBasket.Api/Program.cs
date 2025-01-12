@@ -82,6 +82,9 @@ app.MapControllers(); //scans all controllers in the application and collects th
 
 app.UseExceptionHandler();
 
+
+app.UseRateLimiter();
+
 //HealthCheckOptions => it displays the health of the application and its dependencies like the database in a readable format like json
 // and gives information about the status of every dependency like the database
 // when you visit http://localhost:5000/health, it will return the status of all health checks (like database connections, etc.), and that information will be formatted for the

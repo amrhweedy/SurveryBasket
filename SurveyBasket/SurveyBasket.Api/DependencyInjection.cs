@@ -1,7 +1,9 @@
 ﻿using System.Text;
+using System.Threading.RateLimiting;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using SurveyBasket.Api.Authentication;
 using SurveyBasket.Api.Health;
@@ -96,6 +98,30 @@ public static class DependencyInjection
             .AddUrlGroup(name: "google api", uri: new Uri("https://www.google.com"), tags: ["api"], httpMethod: HttpMethod.Get) // if we call this url from my api and i need to check if the url is correct and the method is get, so if this correct is correct the health check is healthy
             .AddUrlGroup(name: "facebook api", uri: new Uri("https://www.facebook.com"), tags: ["api"]) // we can add tags to group some health checks with each other 
             .AddCheck<MailProviderHealthCheck>(name: "mail provider");
+
+
+        // concurrency rate limiting
+
+        services.AddRateLimiter(rateLimiterOptions =>
+        {
+            // the default rejection status code is 503 (Service Unavailable). so we change it to 429 (Too Many Requests)
+            rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            rateLimiterOptions.AddConcurrencyLimiter("concurrency", concurrencyLimiterOptions =>
+          {
+              concurrencyLimiterOptions.PermitLimit = 2;  //maximum number of requests that can be processed simultaneously (at the same time).
+
+              //maximum number of requests that can be queued (wait in line) while waiting for one of the currently running requests to finish.
+              //In this case, if more than 2 requests come in at once, only 1 additional request can wait in the queue.
+              // If more than 1 request is waiting, the server will reject the extra requests(returning HTTP 429 status code).
+              concurrencyLimiterOptions.QueueLimit = 1;
+
+
+              concurrencyLimiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst; //the oldest request in the queue will be processed first)
+          });
+        }
+
+       );
 
 
         return services;
