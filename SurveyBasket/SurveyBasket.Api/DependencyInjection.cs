@@ -1,6 +1,4 @@
-﻿using System.Text;
-using System.Threading.RateLimiting;
-using Hangfire;
+﻿using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.RateLimiting;
@@ -16,6 +14,8 @@ using SurveyBasket.Api.Services.Roles;
 using SurveyBasket.Api.Services.Users;
 using SurveyBasket.Api.Services.Votes;
 using SurveyBasket.Api.Settings;
+using System.Text;
+using System.Threading.RateLimiting;
 
 namespace SurveyBasket.Api;
 
@@ -179,6 +179,44 @@ public static class DependencyInjection
        );
 
 
+        // sliding Window Limiter ( listen again)
+
+        services.AddRateLimiter(rateLimiterOptions =>
+        {
+            // the default rejection status code is 503 (Service Unavailable). so we change it to 429 (Too Many Requests)
+            rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            rateLimiterOptions.AddSlidingWindowLimiter("sliding", options =>
+            {
+                options.PermitLimit = 2;
+                options.Window = TimeSpan.FromSeconds(20);
+                options.SegmentsPerWindow = 2;
+                options.QueueLimit = 1;
+                options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+
+            });
+        }
+
+       );
+
+        // IP Address Limiter => is a way to control the number of requests allowed from a specific IP address within a certain period of time. It’s a type of rate limiting that applies limits based on the client's IP address.
+        services.AddRateLimiter(rateLimiterOptions =>
+        {
+            // Change the rejection status code to 429 (Too Many Requests)
+            rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            rateLimiterOptions.AddPolicy("ipLimit", httpContext =>
+            {
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: httpContext.Connection.RemoteIpAddress?.ToString(),
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 2, // Maximum number of requests allowed from a specific IP address is 2 through 20 seconds if he sends more than 2 requests in 20 seconds it will be rejected (returning HTTP 429 status code (too many requests))
+                        Window = TimeSpan.FromSeconds(20)// it means we can handle or recieve 2 requests in 20 seconds from the same ip address
+                    }
+                );
+            });
+        });
 
         return services;
     }

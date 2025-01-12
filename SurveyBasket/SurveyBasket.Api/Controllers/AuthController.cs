@@ -180,6 +180,14 @@ public class AuthController(IAuthService authService,
         Thread.Sleep(10000);
         return Ok();
     }
+
+
+    [HttpGet("test-ip-address-limiter")]
+    [EnableRateLimiting("ipLimit")]
+    public IActionResult TestIpAddressLimiter()
+    {
+        return Ok();
+    }
 }
 
 
