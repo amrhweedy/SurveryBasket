@@ -1,8 +1,10 @@
-﻿using Hangfire;
+﻿using System.Text;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.IdentityModel.Tokens;
 using SurveyBasket.Api.Authentication;
+using SurveyBasket.Api.Health;
 using SurveyBasket.Api.Services.Authentication;
 using SurveyBasket.Api.Services.BackgroundJobs;
 using SurveyBasket.Api.Services.Cashing;
@@ -12,7 +14,6 @@ using SurveyBasket.Api.Services.Roles;
 using SurveyBasket.Api.Services.Users;
 using SurveyBasket.Api.Services.Votes;
 using SurveyBasket.Api.Settings;
-using System.Text;
 
 namespace SurveyBasket.Api;
 
@@ -90,7 +91,11 @@ public static class DependencyInjection
 
         // add healthe check service
         services.AddHealthChecks()
-            .AddSqlServer(name: "Database", connectionString: connectionString);
+            .AddSqlServer(name: "Database", connectionString: connectionString)
+            .AddHangfire(options => { options.MinimumAvailableServers = 1; })  // we need a at least 1 server the hanfire works to it to the health check is healthy
+            .AddUrlGroup(name: "google api", uri: new Uri("https://www.google.com"), tags: ["api"], httpMethod: HttpMethod.Get) // if we call this url from my api and i need to check if the url is correct and the method is get, so if this correct is correct the health check is healthy
+            .AddUrlGroup(name: "facebook api", uri: new Uri("https://www.facebook.com"), tags: ["api"]) // we can add tags to group some health checks with each other 
+            .AddCheck<MailProviderHealthCheck>(name: "mail provider");
 
 
         return services;
