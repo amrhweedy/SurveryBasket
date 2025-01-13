@@ -109,12 +109,12 @@ public static class DependencyInjection
 
             rateLimiterOptions.AddConcurrencyLimiter("concurrency", concurrencyLimiterOptions =>
           {
-              concurrencyLimiterOptions.PermitLimit = 2;  //maximum number of requests that can be processed simultaneously (at the same time).
+              concurrencyLimiterOptions.PermitLimit = 1000;  //maximum number of requests that can be processed simultaneously (at the same time).
 
               //maximum number of requests that can be queued (wait in line) while waiting for one of the currently running requests to finish.
               //In this case, if more than 2 requests come in at once, only 1 additional request can wait in the queue.
               // If more than 1 request is waiting, the server will reject the extra requests(returning HTTP 429 status code).
-              concurrencyLimiterOptions.QueueLimit = 1;
+              concurrencyLimiterOptions.QueueLimit = 100;
 
 
               concurrencyLimiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst; //the oldest request in the queue will be processed first)
@@ -217,6 +217,29 @@ public static class DependencyInjection
                 );
             });
         });
+
+
+
+        // user limiter => is a system that limits how many actions or requests a specific user can make within a certain period of time.
+        // It ensures that each user gets fair access to the system and prevents overloading or abuse by individual users.
+        services.AddRateLimiter(rateLimiterOptions =>
+        {
+            // Change the rejection status code to 429 (Too Many Requests)
+            rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            rateLimiterOptions.AddPolicy("userLimit", httpContext =>
+            {
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: httpContext.User.GetUserId(),
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 2, // Maximum number of requests allowed from a specific user is 2 through 20 seconds if he sends more than 2 requests in 20 seconds it will be rejected (returning HTTP 429 status code (too many requests))
+                        Window = TimeSpan.FromSeconds(20)// it means we can handle or recieve 2 requests in 20 seconds from the same ip address
+                    }
+                );
+            });
+        });
+
 
         return services;
     }

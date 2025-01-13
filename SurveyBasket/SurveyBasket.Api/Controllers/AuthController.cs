@@ -188,6 +188,13 @@ public class AuthController(IAuthService authService,
     {
         return Ok();
     }
+
+    [HttpGet("test-user-limiter")]
+    [EnableRateLimiting("userLimit")]
+    public IActionResult TestUserLimiter()
+    {
+        return Ok();
+    }
 }
 
 
