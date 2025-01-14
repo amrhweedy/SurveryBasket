@@ -1,5 +1,11 @@
-﻿namespace SurveyBasket.Api.Controllers;
-[Route("api/[controller]")]
+﻿using Asp.Versioning;
+
+namespace SurveyBasket.Api.Controllers;
+
+
+[ApiVersion(1, Deprecated = true)]
+[ApiVersion(2)]
+[Route("api/v{v:apiVersion}/[controller]")]
 [ApiController]
 //[Authorize]  // it means that the user must be authenticated (have a valid token) to access any endpoint in this controller
 
@@ -16,14 +22,25 @@ public class PollsController(IPollService pollService) : ControllerBase
         return Ok(polls);
     }
 
-
+    [MapToApiVersion(1)]
     [HttpGet("current")]
     [Authorize(Roles = DefaultRoles.Member)]
-    public async Task<IActionResult> GetCurrent(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetCurrentV1(CancellationToken cancellationToken)
     {
-        var polls = await _pollService.GetCurrentAsync(cancellationToken);
+        var polls = await _pollService.GetCurrentAsyncV1(cancellationToken);
         return Ok(polls);
     }
+
+
+    [MapToApiVersion(2)]
+    [HttpGet("current")]
+    [Authorize(Roles = DefaultRoles.Member)]
+    public async Task<IActionResult> GetCurrentV2(CancellationToken cancellationToken)
+    {
+        var polls = await _pollService.GetCurrentAsyncV2(cancellationToken);
+        return Ok(polls);
+    }
+
 
     [HttpGet("{id}")]
     [HasPermission(Permissions.GetPolls)]

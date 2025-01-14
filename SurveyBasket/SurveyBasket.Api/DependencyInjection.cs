@@ -1,4 +1,5 @@
-﻿using Hangfire;
+﻿using Asp.Versioning;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.RateLimiting;
@@ -99,6 +100,10 @@ public static class DependencyInjection
             .AddUrlGroup(name: "facebook api", uri: new Uri("https://www.facebook.com"), tags: ["api"]) // we can add tags to group some health checks with each other 
             .AddCheck<MailProviderHealthCheck>(name: "mail provider");
 
+
+
+
+        #region rate limiter
 
         // concurrency rate limiting
 
@@ -239,6 +244,67 @@ public static class DependencyInjection
                 );
             });
         });
+
+        #endregion
+
+
+        // api versioning
+        //1- UrlSegmentApiVersionReader
+
+        services.AddApiVersioning(options =>
+        {
+            options.DefaultApiVersion = new ApiVersion(1);
+            options.AssumeDefaultVersionWhenUnspecified = true;
+            options.ReportApiVersions = true;   // tell the client which api version is the current in the response header 
+
+            options.ApiVersionReader = new UrlSegmentApiVersionReader();
+
+        }).AddApiExplorer(options =>
+        {
+            options.GroupNameFormat = "'v'V";
+            options.SubstituteApiVersionInUrl = true;
+        });
+
+
+
+        //// 2-HeaderApiVersionReader
+
+        //services.AddApiVersioning(options =>
+        //{
+        //    options.DefaultApiVersion = new ApiVersion(1);
+        //    options.AssumeDefaultVersionWhenUnspecified = true;
+
+        //    options.ApiVersionReader = new HeaderApiVersionReader("x-api-version");
+
+        //}).AddApiExplorer(options =>
+        //{
+        //    options.GroupNameFormat = "'v'V";
+        //    options.SubstituteApiVersionInUrl = true;
+        //});
+
+
+
+        //3 - we can use more than one api version readers
+
+        //services.AddApiVersioning(options =>
+        //{
+        //    options.DefaultApiVersion = new ApiVersion(1);
+        //    options.AssumeDefaultVersionWhenUnspecified = true;
+
+        //    options.ApiVersionReader = ApiVersionReader.Combine(
+        //        new UrlSegmentApiVersionReader(),
+        //        new HeaderApiVersionReader("x-api-version");
+
+        //}).AddApiExplorer(options =>
+        //{
+        //    options.GroupNameFormat = "'v'V";
+        //    options.SubstituteApiVersionInUrl = true;
+        //});
+
+
+
+
+
 
 
         return services;

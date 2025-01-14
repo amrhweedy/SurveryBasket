@@ -5,6 +5,7 @@ using SurveyBasket.Api.Contracts.Authentication;
 using SurveyBasket.Api.Services.Authentication;
 
 namespace SurveyBasket.Api.Controllers;
+
 [Route("api/[controller]")]
 [ApiController]
 public class AuthController(IAuthService authService,
