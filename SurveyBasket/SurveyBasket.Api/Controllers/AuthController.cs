@@ -20,7 +20,19 @@ public class AuthController(IAuthService authService,
     private readonly IOptionsMonitor<JwtOptions> _optionsMonitor = optionsMonitor;
     private readonly ILogger<AuthController> _logger = logger;
 
+
+
+    /// <summary>
+    /// allow user to login
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns> return jwt token</returns>
     [HttpPost]
+    [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]   // return the response with the shape of the type in case of success or failure
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [Produces("application/json")] // the response content by defualt is text/plain so we change it to json
+
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
         // placeholder

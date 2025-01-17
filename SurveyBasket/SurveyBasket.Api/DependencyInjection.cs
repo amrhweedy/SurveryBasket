@@ -3,6 +3,7 @@ using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SurveyBasket.Api.Authentication;
 using SurveyBasket.Api.Health;
@@ -15,6 +16,8 @@ using SurveyBasket.Api.Services.Roles;
 using SurveyBasket.Api.Services.Users;
 using SurveyBasket.Api.Services.Votes;
 using SurveyBasket.Api.Settings;
+using SurveyBasket.Api.Swagger;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Text;
 using System.Threading.RateLimiting;
 
@@ -99,8 +102,6 @@ public static class DependencyInjection
             .AddUrlGroup(name: "google api", uri: new Uri("https://www.google.com"), tags: ["api"], httpMethod: HttpMethod.Get) // if we call this url from my api and i need to check if the url is correct and the method is get, so if this correct is correct the health check is healthy
             .AddUrlGroup(name: "facebook api", uri: new Uri("https://www.facebook.com"), tags: ["api"]) // we can add tags to group some health checks with each other 
             .AddCheck<MailProviderHealthCheck>(name: "mail provider");
-
-
 
 
         #region rate limiter
@@ -248,39 +249,39 @@ public static class DependencyInjection
         #endregion
 
 
+        #region API Versioning
         // api versioning
         //1- UrlSegmentApiVersionReader
 
-        services.AddApiVersioning(options =>
-        {
-            options.DefaultApiVersion = new ApiVersion(1);
-            options.AssumeDefaultVersionWhenUnspecified = true;
-            options.ReportApiVersions = true;   // tell the client which api version is the current in the response header 
-
-            options.ApiVersionReader = new UrlSegmentApiVersionReader();
-
-        }).AddApiExplorer(options =>
-        {
-            options.GroupNameFormat = "'v'V";
-            options.SubstituteApiVersionInUrl = true;
-        });
-
-
-
-        //// 2-HeaderApiVersionReader
-
         //services.AddApiVersioning(options =>
         //{
-        //    options.DefaultApiVersion = new ApiVersion(1);
+        //    options.DefaultApiVersion = new ApiVersion(1.0);
         //    options.AssumeDefaultVersionWhenUnspecified = true;
+        //    options.ReportApiVersions = true;   // tell the client which api version is the current in the response header 
 
-        //    options.ApiVersionReader = new HeaderApiVersionReader("x-api-version");
+        //    options.ApiVersionReader = new UrlSegmentApiVersionReader();
 
         //}).AddApiExplorer(options =>
         //{
         //    options.GroupNameFormat = "'v'V";
         //    options.SubstituteApiVersionInUrl = true;
         //});
+
+        // 2-HeaderApiVersionReader
+
+        services.AddApiVersioning(options =>
+        {
+            options.DefaultApiVersion = new ApiVersion(1);
+            options.AssumeDefaultVersionWhenUnspecified = true;
+            options.ReportApiVersions = true;
+
+            options.ApiVersionReader = new HeaderApiVersionReader("x-api-version");
+
+        }).AddApiExplorer(options =>
+        {
+            options.GroupNameFormat = "'v'V";
+            options.SubstituteApiVersionInUrl = true;
+        });
 
 
 
@@ -301,10 +302,7 @@ public static class DependencyInjection
         //    options.SubstituteApiVersionInUrl = true;
         //});
 
-
-
-
-
+        #endregion
 
 
         return services;
@@ -313,11 +311,62 @@ public static class DependencyInjection
     public static IServiceCollection AddSwaggerConfig(this IServiceCollection services)
     {
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
+
+        services.AddSwaggerGen(options =>
+        {
+
+            // we dont need this configuration because we make dynamic class scan all versions
+
+            //options.SwaggerDoc("v1", new OpenApiInfo
+            //{
+            //    Version = "v1",
+            //    Title = "SurveyBasket.Api",
+            //    Description = 
+            //    TermsOfService = new Uri("https://example.com/terms"),
+            //    Contact = new OpenApiContact
+            //    {
+            //        Name = "Example Contact",
+            //        Url = new Uri("https://example.com/contact")
+            //    },
+            //    License = new OpenApiLicense
+            //    {
+            //        Name = "Example License",
+            //        Url = new Uri("https://example.com/license")
+            //    }
+            //});
+
+            //options.SwaggerDoc("v2", new OpenApiInfo
+            //{
+            //    Version = "v2",
+            //    Title = "SurveyBasket.Api",
+            //    Description = "version 2",
+            //    TermsOfService = new Uri("https://example.com/terms"),
+            //    Contact = new OpenApiContact
+            //    {
+            //        Name = "Example Contact",
+            //        Url = new Uri("https://example.com/contact")
+            //    },
+            //    License = new OpenApiLicense
+            //    {
+            //        Name = "Example License",
+            //        Url = new Uri("https://example.com/license")
+            //    }
+            //});
+
+
+            // display the xml comments on the endpoints in the swagger ui
+            var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+
+            // take the number of api versions from the swagger ui and set it automatically in header x-api-version
+            options.OperationFilter<SwaggerDefaultValues>();
+        });
+
+        // for enable the api versioning in swagger
+        services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 
         return services;
     }
-
 
     public static IServiceCollection AddMapsterConfig(this IServiceCollection services)
     {
@@ -412,8 +461,6 @@ public static class DependencyInjection
             // options.Lockout.MaxFailedAccessAttempts = 5;
             // options.Lockout.AllowedForNewUsers = true;
         });
-
-
 
         return services;
     }

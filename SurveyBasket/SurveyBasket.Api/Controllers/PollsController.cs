@@ -5,9 +5,10 @@ namespace SurveyBasket.Api.Controllers;
 
 [ApiVersion(1, Deprecated = true)]
 [ApiVersion(2)]
-[Route("api/v{v:apiVersion}/[controller]")]
+[Route("api/[controller]")]
 [ApiController]
 //[Authorize]  // it means that the user must be authenticated (have a valid token) to access any endpoint in this controller
+
 
 public class PollsController(IPollService pollService) : ControllerBase
 {
@@ -25,6 +26,8 @@ public class PollsController(IPollService pollService) : ControllerBase
     [MapToApiVersion(1)]
     [HttpGet("current")]
     [Authorize(Roles = DefaultRoles.Member)]
+
+    //[SwaggerIgnore]  // swagger will ignore this endpoint in the swagger ui
     public async Task<IActionResult> GetCurrentV1(CancellationToken cancellationToken)
     {
         var polls = await _pollService.GetCurrentAsyncV1(cancellationToken);
