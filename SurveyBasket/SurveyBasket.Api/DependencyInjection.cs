@@ -317,6 +317,7 @@ public static class DependencyInjection
 
             // we dont need this configuration because we make dynamic class scan all versions
 
+            #region swagger configuration manually
             //options.SwaggerDoc("v1", new OpenApiInfo
             //{
             //    Version = "v1",
@@ -352,6 +353,8 @@ public static class DependencyInjection
             //        Url = new Uri("https://example.com/license")
             //    }
             //});
+
+            #endregion
 
 
             // display the xml comments on the endpoints in the swagger ui

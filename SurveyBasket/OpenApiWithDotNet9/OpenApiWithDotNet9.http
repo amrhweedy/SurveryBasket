@@ -1,0 +1,6 @@
+@OpenApiWithDotNet9_HostAddress = http://localhost:5067
+
+GET {{OpenApiWithDotNet9_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
