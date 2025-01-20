@@ -95,7 +95,14 @@ public static class DependencyInjection
         // Mail Settings Configuration => IOptions<MailSettings>
         services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
 
-        // add healthe check service
+        services.AddOptions<MailSettings>()
+            .BindConfiguration(nameof(MailSettings))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+
+
+        // add health check service
         services.AddHealthChecks()
             .AddSqlServer(name: "Database", connectionString: connectionString)
             .AddHangfire(options => { options.MinimumAvailableServers = 1; })  // we need a at least 1 server the hanfire works to it to the health check is healthy

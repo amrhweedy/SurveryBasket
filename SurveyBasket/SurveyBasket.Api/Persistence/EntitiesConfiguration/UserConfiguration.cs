@@ -1,7 +1,4 @@
-﻿
-using SurveyBasket.Api.Abstractions.Consts;
-
-namespace SurveyBasket.Api.Persistence.EntitiesConfiguration;
+﻿namespace SurveyBasket.Api.Persistence.EntitiesConfiguration;
 
 public class UserConfiguration : IEntityTypeConfiguration<ApplicationUser>
 {
@@ -17,7 +14,11 @@ public class UserConfiguration : IEntityTypeConfiguration<ApplicationUser>
 
         // seeding data
 
-        var passwordHasher = new PasswordHasher<ApplicationUser>();
+        //var passwordHasher = new PasswordHasher<ApplicationUser>(); =>
+        //we use this in the first seeding data to make hash password
+        // but there is a problem when we make a migration it will execute the seeding again
+        // and update the password hash with every migration 
+        // so we can use it in the first migration and after that take the password hash for the admin and use it in the second migration
 
         builder.HasData(new ApplicationUser
         {
@@ -31,7 +32,9 @@ public class UserConfiguration : IEntityTypeConfiguration<ApplicationUser>
             SecurityStamp = DefaultUsers.AdminSecurityStamp,
             ConcurrencyStamp = DefaultUsers.AdminConcurrencyStamp,
             EmailConfirmed = true, // to enable admin to login
-            PasswordHash = passwordHasher.HashPassword(null!, DefaultUsers.AdminPassword),
+            //  PasswordHash = passwordHasher.HashPassword(null!, DefaultUsers.AdminPassword),                    
+            PasswordHash = DefaultUsers.AdminPassword
+
         });
     }
 }

@@ -31,10 +31,9 @@ public class NotificationService(ApplicationDbContext context,
                   .ToListAsync();
         }
 
-        // get users to send email to them
-        // TODO => select members only
+        // get users(members) to send email to them
 
-        var users = await _userManager.Users.ToListAsync();
+        var users = await _userManager.GetUsersInRoleAsync(DefaultRoles.Member);
 
         var origin = _httpContextAccessor.HttpContext?.Request.Headers.Origin;
 
