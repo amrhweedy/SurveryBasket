@@ -16,7 +16,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         // select all foreign keys that have cascade delete behavior and are not owned
-        //we make this because the problem of cycles or multiple cascade paths
+        //We make this because of the problem of cycles or multiple cascade paths
+        //Owned entities are designed to be deleted automatically when their principal entity is deleted.
+        //This is because owned entities are conceptually part of the principal entity and don’t have an independent existence.
+        // like the relation between the ApplicationUser and the RefreshToken, the user owns the refreshToken, so the deleting Behavior must be cascaded, it means if a user is deleted, the related refresh tokens must be deleted 
         var cascadeFKS = modelBuilder.Model
             .GetEntityTypes()
             .SelectMany(t => t.GetForeignKeys())
