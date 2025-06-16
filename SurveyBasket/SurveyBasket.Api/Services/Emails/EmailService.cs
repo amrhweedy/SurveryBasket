@@ -16,8 +16,8 @@ public class EmailService(IOptions<MailSettings> options ) : IEmailSender
         var message = new MimeMessage
         {
             Sender = MailboxAddress.Parse(_options.Mail),
-            Subject = subject,
-
+            Subject = subject
+            
         };
 
         message.To.Add(MailboxAddress.Parse(email));

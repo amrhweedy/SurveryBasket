@@ -86,7 +86,12 @@ public class AuthService(
 
         // check password , we make lockoutOnFailutre = true to enable the lockout for the user
         // if the user is locked and make login with valid credintals the app will give him error and the error is  UserErrors.LockedUser
-
+        // we here check if email is confirmed or not using PasswordSignInAsync method
+        // and we must make the configuration in the program.cs =>  options.SignIn.RequireConfirmedEmail = true;
+        // when we use the PasswordSignInAsync and make the above configuration this method will check on the EmailConfirmed field in the Users table if true the user can make login
+        // when the user register the app will send an email to the user to confirm the email, if the user clicks on the link which in the email it will be redirected to the page in the app 
+        // inside this page the fron call the Endpoint ConfirmEmailAsync to confirm the email, if every thing is ok this method will update the emailConfirmed field to true in the database for this user
+        // so the user when make login using PasswordSignInAsync and the Configuraion in the progam.cs it will check for this field if true the user can make login
         var result = await _signInManager.PasswordSignInAsync(user, Password, false, true);
 
         if (result.Succeeded)
