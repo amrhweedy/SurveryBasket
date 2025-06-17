@@ -2,6 +2,9 @@
 
 public static class Permissions
 {
+    // there is a property called ClaimType in the RoleClaims table every claim has a type
+    // so when we add any permission like "polls:read" in the column "ClaimValue" we set the ClaimType to "permissions"
+    // it means that it may there are many ClaimTypes another "permissions" os we can filter by ClaimType to get all the permissions
     public static string Type { get; } = "permissions";
 
     public const string GetPolls = "polls:read";

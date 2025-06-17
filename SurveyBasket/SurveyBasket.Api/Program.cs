@@ -47,7 +47,7 @@ if (app.Environment.IsDevelopment())  // it knows that we are in development mod
 }
 
 
-app.UseSerilogRequestLogging();
+app.UseSerilogRequestLogging(); // log the info about the http requests and responses
 
 app.UseHttpsRedirection();  // to redirect http to https, it means if i use http it will redirect to https
 

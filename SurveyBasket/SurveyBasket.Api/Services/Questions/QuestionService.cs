@@ -66,7 +66,7 @@ public class QuestionService(ApplicationDbContext context,
     // we need here to get the available questions with answers for the specific poll to make the user votes on this poll (vote on every question inside this poll)
     public async Task<Result<IEnumerable<QuestionResponse>>> GetAvailableAsync(int pollId, string userId, CancellationToken cancellationToken = default)
     {
-        // 1- check for this user votes before for this poll
+        // 1- check => does this user vote before for this poll?
         var hasVote = await _context.Votes.AnyAsync(v => v.PollId == pollId && v.UserId == userId, cancellationToken);
 
         if (hasVote)
@@ -205,7 +205,7 @@ public class QuestionService(ApplicationDbContext context,
         //1-  convert from list<Answer> to list<string>
         var currentAnswers = question.Answers.Select(a => a.Content).ToList();
 
-        //2-  add the new answers to the current answers for the same request ,for example if the request has 2 answers ["a","b","c"] and the current answers has answers ["a","b] then the new answers will be ["c"] then add these new answers to the question
+        //2-  add the new answers to the current answers for the same request ,for example if the request has 3 answers ["a","b","c"] and the current answers has answers ["a","b] then the new answers will be ["c"] then add these new answers to the question
         var newAnswers = request.Answers.Except(currentAnswers).ToList();
 
         newAnswers.ForEach(answer => question.Answers.Add(new Answer { Content = answer }));

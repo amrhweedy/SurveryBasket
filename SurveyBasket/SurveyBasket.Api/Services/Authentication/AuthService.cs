@@ -11,6 +11,7 @@ namespace SurveyBasket.Api.Services.Authentication;
 
 public class AuthService(
     UserManager<ApplicationUser> userManager,
+    RoleManager<ApplicationRole> roleManager,
     SignInManager<ApplicationUser> signInManager,
     IJwtProvider jwtProvider,
     ILogger<AuthService> logger,
@@ -20,6 +21,7 @@ public class AuthService(
     ) : IAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
+    private readonly RoleManager<ApplicationRole> _roleManager = roleManager;
     private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
     private readonly IJwtProvider _jwtProvider = jwtProvider;
     private readonly ILogger<AuthService> _logger = logger;
@@ -443,7 +445,7 @@ public class AuthService(
     private async Task SendConfirmationEmail(ApplicationUser user, string code)
     {
         // origin => the url of the client (frontend) like http://localhost:4200
-        // the clint must tell me the route of the confirmation page (auth/emailconfirmatinon), when the user will click on the link it will redirect to this url $"{origin}/auth/emailConfirmatin?userId={user.Id}&code={code}"
+        // the client must tell me the route of the confirmation page (auth/emailConfirmation), when the user will click on the link it will redirect to this url $"{origin}/auth/emailConfirmatin?userId={user.Id}&code={code}"
 
         var origin = _httpContextAccessor.HttpContext!.Request.Headers.Origin;
 
@@ -451,7 +453,7 @@ public class AuthService(
             new Dictionary<string, string>
             {
                 {"{{name}}" , user.FirstName },
-                { "{{action_url}}" , $"{origin}/auth/emailConfirmatin?userId={user.Id}&code={code}"}
+                { "{{action_url}}" , $"{origin}/auth/emailConfirmation?userId={user.Id}&code={code}"}
             }
       );
 
@@ -492,8 +494,10 @@ public class AuthService(
     {
         var userRoles = await _userManager.GetRolesAsync(user);
 
-        //we can use RoleManager to get the permissinons but if the user have 10 roles we will loop for the userRoles and get the permissions for each role so we will go to the database 10 times (bad performace)
+        //we can use RoleManager to get the permissions but if the user have 10 roles we will loop for the userRoles and get the permissions for each role so we will go to the database 10 times (bad performance)
         // so we use the EF core and context to make one query to get all the permissions for all the userRoles
+
+
 
         //var userPermissions = await _context.Roles
         //    .Join(_context.RoleClaims,
