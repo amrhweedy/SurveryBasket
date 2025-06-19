@@ -1,4 +1,6 @@
-﻿using SurveyBasket.Api.Contracts.Users;
+﻿using System.Collections.Generic;
+using Serilog.Filters;
+using SurveyBasket.Api.Contracts.Users;
 using SurveyBasket.Api.Services.Roles;
 namespace SurveyBasket.Api.Services.Users;
 
@@ -13,6 +15,37 @@ public class UserService(UserManager<ApplicationUser> userManager, IRoleService 
     {
         // get users with their roles
         #region join using fluent method using GroupBy object 
+
+
+        //var x = await (from user in _context.Users
+        //               join userRoles in _context.UserRoles
+        //               on user.Id equals userRoles.UserId
+        //               join role in _context.Roles
+        //               on userRoles.RoleId equals role.Id into roles // role is IEnumerable<ApplicationRole> When you use join ... into roles, you are telling LINQ:“For each user, give me all the matching roles as a group(list).”
+        //               where roles.Any(x => x.Name != DefaultRoles.Member)
+        //               select new
+        //               {
+        //                   user.Id,
+        //                   user.FirstName,
+        //                   user.LastName,
+        //                   user.Email,
+        //                   user.IsDisabled,
+        //                   roles = roles.Select(x => x.Name).ToList()
+        //               })
+        //               .GroupBy(u => new {u.Id, u.FirstName , u.LastName,u.Email,u.IsDisabled})
+        //               .Select(g=> new UserResponse (
+        //                   g.Key.Id,
+        //                   g.Key.FirstName,
+        //                   g.Key.LastName,
+        //                   g.Key.Email,
+        //                   g.Key.IsDisabled,
+        //                   g.SelectMany(x=>x.roles).Distinct().ToList()
+                                                   
+        //                   )).ToListAsync(cancellationToken);
+    
+                   
+         
+
 
         return await _context.Users.Join(
            _context.UserRoles,

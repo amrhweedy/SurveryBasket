@@ -1,4 +1,5 @@
-﻿using SurveyBasket.Api.Contracts.Roles;
+﻿using System.Security.Claims;
+using SurveyBasket.Api.Contracts.Roles;
 
 namespace SurveyBasket.Api.Services.Roles;
 
@@ -25,6 +26,7 @@ public class RoleService(RoleManager<ApplicationRole> roleManager, ApplicationDb
             return Result.Failure<RoleDetailResponse>(RoleErrors.RoleNotFound);
 
         var permissions = await _roleManager.GetClaimsAsync(role);
+
 
         var response = new RoleDetailResponse(
             role.Id,
@@ -97,6 +99,7 @@ public class RoleService(RoleManager<ApplicationRole> roleManager, ApplicationDb
         if (request.Permissions.Except(allowedPermissions).Any())
             return Result.Failure<RoleDetailResponse>(RoleErrors.InvalidPermissions);
 
+        role.Name = request.Name;
 
         var result = await _roleManager.UpdateAsync(role);
 
