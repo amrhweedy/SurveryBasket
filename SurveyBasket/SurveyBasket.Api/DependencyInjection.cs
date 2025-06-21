@@ -322,8 +322,8 @@ public static class DependencyInjection
         services.AddSwaggerGen(options =>
         {
 
-            // we dont need this configuration because we make dynamic class scan all versions
-
+            // we dont need this configuration because we make dynamic class(ConfigureSwaggerOptions) scan all versions 
+            // we make swagger support the Authorization in this file (ConfigureSwaggerOptions) also
             #region swagger configuration manually
             //options.SwaggerDoc("v1", new OpenApiInfo
             //{

@@ -43,6 +43,9 @@ builder.Services
 // there are some packages we can install them to create a ui for the api
 
 #region open api congiguration (add the versions in the OpenApi document manually and add Bearer security scheme) 
+
+// if we need to change the info of the OpenApi document
+
 //builder.Services.AddOpenApi(options =>
 //{
 //    // transform the OpenApi document, change the title and then version name and description
@@ -58,7 +61,8 @@ builder.Services
 //    });
 
 
-//    // transform the Bearer security scheme
+//    transform the Bearer security scheme, add the authentication to the OpenApi document using this class BearerSecuritySchemeTransformer
+
 //    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
 
 //});

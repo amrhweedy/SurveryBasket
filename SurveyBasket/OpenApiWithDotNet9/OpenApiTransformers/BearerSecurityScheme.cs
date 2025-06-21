@@ -4,7 +4,7 @@ using Microsoft.OpenApi.Models;
 
 namespace OpenApiWithDotNet9.OpenApiTransformers;
 
-//Its purpose is to dynamically add a Bearer security scheme to the OpenAPI document if such an authentication scheme is configured in the application.
+//Its purpose is to dynamically add a Bearer security scheme to the OpenAPI document if an authentication scheme is configured in the application.
 
 public sealed class BearerSecuritySchemeTransformer(IAuthenticationSchemeProvider authenticationSchemeProvider) : IOpenApiDocumentTransformer
 {

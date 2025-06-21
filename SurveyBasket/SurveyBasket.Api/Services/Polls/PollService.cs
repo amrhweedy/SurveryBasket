@@ -26,6 +26,7 @@ public class PollService(ApplicationDbContext context, INotificationService noti
     }
 
 
+    // we make this to test the api version
     public async Task<IEnumerable<PollResponseV2>> GetCurrentAsyncV2(CancellationToken cancellationToken = default)
     {
         return await _context.Polls

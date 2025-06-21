@@ -9,6 +9,7 @@ public record PollResponse(int Id,
 
 
 
+// we make this to test the api version
 public record PollResponseV2(int Id,
     string Title,
     string Summary,
