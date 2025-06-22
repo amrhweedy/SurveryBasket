@@ -1,9 +1,4 @@
 ﻿using MailKit.Net.Smtp;
-using MailKit.Security;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Options;
-using SurveyBasket.Api.Settings;
-
 namespace SurveyBasket.Api.Health;
 
 // we try to connect to the email provider and try to make authenticate

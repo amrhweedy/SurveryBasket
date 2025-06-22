@@ -1,6 +1,4 @@
-﻿using SurveyBasket.Api.Contracts.Common;
-
-namespace SurveyBasket.Api.Services.Questions;
+﻿namespace SurveyBasket.Api.Services.Questions;
 
 public interface IQuestionService
 {

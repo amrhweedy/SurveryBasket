@@ -1,6 +1,4 @@
-﻿using SurveyBasket.Api.Contracts.Votes;
-
-namespace SurveyBasket.Api.Services.Votes;
+﻿namespace SurveyBasket.Api.Services.Votes;
 
 public class VoteService(ApplicationDbContext context) : IVoteService
 {

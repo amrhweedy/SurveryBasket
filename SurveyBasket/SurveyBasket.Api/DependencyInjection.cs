@@ -1,25 +1,12 @@
-﻿using Asp.Versioning;
+﻿using System.Threading.RateLimiting;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using SurveyBasket.Api.Authentication;
 using SurveyBasket.Api.Health;
-using SurveyBasket.Api.Services.Authentication;
 using SurveyBasket.Api.Services.BackgroundJobs;
-using SurveyBasket.Api.Services.Cashing;
 using SurveyBasket.Api.Services.Emails;
-using SurveyBasket.Api.Services.Results;
-using SurveyBasket.Api.Services.Roles;
-using SurveyBasket.Api.Services.Users;
-using SurveyBasket.Api.Services.Votes;
-using SurveyBasket.Api.Settings;
 using SurveyBasket.Api.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Text;
-using System.Threading.RateLimiting;
 
 namespace SurveyBasket.Api;
 

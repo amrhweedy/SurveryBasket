@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.RateLimiting;
-using SurveyBasket.Api.Contracts.Votes;
-using SurveyBasket.Api.Services.Votes;
+﻿namespace SurveyBasket.Api.Controllers;
 
-namespace SurveyBasket.Api.Controllers;
+
 [Route("api/polls/{pollId}/vote")]
 [ApiController]
 [Authorize(Roles = DefaultRoles.Member)]

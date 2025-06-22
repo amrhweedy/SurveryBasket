@@ -1,6 +1,4 @@
-﻿using SurveyBasket.Api.Abstractions.Consts;
-
-namespace SurveyBasket.Api.Persistence.EntitiesConfiguration;
+﻿namespace SurveyBasket.Api.Persistence.EntitiesConfiguration;
 
 public class RoleClaimConfiguration : IEntityTypeConfiguration<IdentityRoleClaim<string>>
 {

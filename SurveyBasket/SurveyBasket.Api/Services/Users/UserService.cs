@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using Serilog.Filters;
-using SurveyBasket.Api.Contracts.Users;
-using SurveyBasket.Api.Services.Roles;
-namespace SurveyBasket.Api.Services.Users;
+﻿namespace SurveyBasket.Api.Services.Users;
 
 public class UserService(UserManager<ApplicationUser> userManager, IRoleService roleService, ApplicationDbContext context) : IUserService
 {
@@ -40,11 +36,11 @@ public class UserService(UserManager<ApplicationUser> userManager, IRoleService 
         //                   g.Key.Email,
         //                   g.Key.IsDisabled,
         //                   g.SelectMany(x=>x.roles).Distinct().ToList()
-                                                   
+
         //                   )).ToListAsync(cancellationToken);
-    
-                   
-         
+
+
+
 
 
         return await _context.Users.Join(

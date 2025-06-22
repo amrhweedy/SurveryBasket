@@ -1,6 +1,4 @@
-﻿using Asp.Versioning;
-
-namespace SurveyBasket.Api.Controllers;
+﻿namespace SurveyBasket.Api.Controllers;
 
 
 [ApiVersion(1, Deprecated = true)]

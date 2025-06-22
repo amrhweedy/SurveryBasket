@@ -1,13 +1,10 @@
 ﻿using MailKit.Net.Smtp;
-using MailKit.Security;
 using Microsoft.AspNetCore.Identity.UI.Services;
- using Microsoft.Extensions.Options;
 using MimeKit;
-using SurveyBasket.Api.Settings;
 
 namespace SurveyBasket.Api.Services.Emails;
 
-public class EmailService(IOptions<MailSettings> options ) : IEmailSender
+public class EmailService(IOptions<MailSettings> options) : IEmailSender
 {
     private readonly MailSettings _options = options.Value;
 
@@ -17,7 +14,7 @@ public class EmailService(IOptions<MailSettings> options ) : IEmailSender
         {
             Sender = MailboxAddress.Parse(_options.Mail),
             Subject = subject
-            
+
         };
 
         message.To.Add(MailboxAddress.Parse(email));
@@ -31,11 +28,11 @@ public class EmailService(IOptions<MailSettings> options ) : IEmailSender
 
         using var client = new SmtpClient();
         client.Connect(_options.Host, _options.Port, SecureSocketOptions.StartTls);
-        client.Authenticate(_options.Mail,_options.Password);
-        await  client.SendAsync(message);
+        client.Authenticate(_options.Mail, _options.Password);
+        await client.SendAsync(message);
         client.Disconnect(true);
 
     }
 
- }
+}
 

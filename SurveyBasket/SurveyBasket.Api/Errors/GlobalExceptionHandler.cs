@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
-
+﻿
 namespace SurveyBasket.Api.Errors;
 
 public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler

@@ -1,6 +1,4 @@
-﻿using SurveyBasket.Api.Contracts.Authentication;
-
-namespace SurveyBasket.Api.Services.Authentication;
+﻿namespace SurveyBasket.Api.Services.Authentication;
 
 public interface IAuthService
 {

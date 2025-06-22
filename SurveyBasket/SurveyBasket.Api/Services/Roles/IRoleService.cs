@@ -1,6 +1,4 @@
-﻿using SurveyBasket.Api.Contracts.Roles;
-
-namespace SurveyBasket.Api.Services.Roles;
+﻿namespace SurveyBasket.Api.Services.Roles;
 
 public interface IRoleService
 {

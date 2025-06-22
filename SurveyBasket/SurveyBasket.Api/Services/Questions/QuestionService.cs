@@ -1,8 +1,4 @@
-﻿using SurveyBasket.Api.Contracts.Answers;
-using SurveyBasket.Api.Contracts.Common;
-using SurveyBasket.Api.Services.Cashing;
-using System.Linq.Dynamic.Core;
-
+﻿
 namespace SurveyBasket.Api.Services.Questions;
 
 public class QuestionService(ApplicationDbContext context,

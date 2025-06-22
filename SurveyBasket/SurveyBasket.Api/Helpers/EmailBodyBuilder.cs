@@ -3,7 +3,7 @@
 public static class EmailBodyBuilder
 {
     // this method is used to replace the vairables in the email body like name and url with the actual values and return the final temaplate
-    public static string GenerateEmailBody(string template, Dictionary<string , string> temaplateModel)
+    public static string GenerateEmailBody(string template, Dictionary<string, string> temaplateModel)
     {
         var templatePath = $"{Directory.GetCurrentDirectory()}/Templates/{template}.html";
         var streamReader = new StreamReader(templatePath);  // to read the content of the HTML template

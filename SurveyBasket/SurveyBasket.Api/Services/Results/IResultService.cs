@@ -1,5 +1,4 @@
-﻿using SurveyBasket.Api.Contracts.Results;
-
+﻿
 namespace SurveyBasket.Api.Services.Results;
 
 public interface IResultService

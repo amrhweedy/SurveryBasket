@@ -1,8 +1,5 @@
-﻿
+﻿namespace SurveyBasket.Api.Controllers;
 
-using SurveyBasket.Api.Contracts.Common;
-
-namespace SurveyBasket.Api.Controllers;
 [Route("api/polls/{pollId}/[controller]")]
 [ApiController]
 //[Authorize]

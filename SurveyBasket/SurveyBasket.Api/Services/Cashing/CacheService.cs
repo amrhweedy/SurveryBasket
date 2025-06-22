@@ -1,7 +1,4 @@
 ﻿
-using Microsoft.Extensions.Caching.Distributed;
-using System.Text.Json;
-
 namespace SurveyBasket.Api.Services.Cashing;
 
 public class CacheService(IDistributedCache distributedCache) : ICacheService

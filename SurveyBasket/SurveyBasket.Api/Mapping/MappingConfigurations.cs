@@ -1,7 +1,4 @@
-﻿using SurveyBasket.Api.Contracts.Students;
-using SurveyBasket.Api.Contracts.Users;
-
-namespace SurveyBasket.Api.Mapping;
+﻿namespace SurveyBasket.Api.Mapping;
 
 public class MappingConfigurations : IRegister
 {

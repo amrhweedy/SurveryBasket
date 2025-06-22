@@ -1,10 +1,4 @@
-﻿using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.Extensions.Options;
-using SurveyBasket.Api.Authentication;
-using SurveyBasket.Api.Contracts.Authentication;
-using SurveyBasket.Api.Services.Authentication;
-
-namespace SurveyBasket.Api.Controllers;
+﻿namespace SurveyBasket.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]

@@ -1,7 +1,4 @@
 ﻿
-using Microsoft.AspNetCore.Identity.UI.Services;
-using SurveyBasket.Api.Helpers;
-
 namespace SurveyBasket.Api.Services.BackgroundJobs;
 
 public class NotificationService(ApplicationDbContext context,
