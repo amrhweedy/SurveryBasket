@@ -6,6 +6,7 @@ using SurveyBasket.Api.Settings;
 
 namespace SurveyBasket.Api.Health;
 
+// we try to connect to the email provider and try to make authenticate
 public class MailProviderHealthCheck(IOptions<MailSettings> options) : IHealthCheck
 {
     private readonly MailSettings _options = options.Value;
