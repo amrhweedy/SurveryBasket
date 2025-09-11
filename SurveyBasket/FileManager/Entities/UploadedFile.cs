@@ -10,7 +10,7 @@ public sealed class UploadedFile
 
 }
 
-//public Guid Id { get; set; } = Guid.CreateVersion7();
+//public Guid Id { get; set; } = Guid.CreateVersion7(); => start from .net 9
 
 //Every time an instance of UploadedFile is created, a new UUID version 7 is generated for the Id property.
 

@@ -42,7 +42,7 @@ public class FileService(IWebHostEnvironment webHostEnvironment, ApplicationDbCo
         await _context.SaveChangesAsync(cancellationToken);
 
 
-        return uploadedFiles.Select(file => file.Id).ToList();
+        return uploadedFiles.Select(file => file.Id);
 
     }
 
@@ -89,7 +89,7 @@ public class FileService(IWebHostEnvironment webHostEnvironment, ApplicationDbCo
     }
     private async Task<UploadedFile> SaveFileAtServer(IFormFile file, CancellationToken cancellationToken)
     {
-        // save the file in the server (wwwroot/Uploads folder) and save the file in the database
+        // save the file in the server (wwwroot/Uploads folder) and save the file name in the database
 
         // save the file in the server with the fake name with fake extension, because if the hacker gets this file he can not know the original file name or original file extension
         var fakeFileName = Path.GetRandomFileName();
