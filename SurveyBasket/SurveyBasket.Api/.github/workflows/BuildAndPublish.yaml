@@ -1,0 +1,39 @@
+name: Build and Publish .NET Web API Artifact
+
+on:
+  push:
+    branches: ['master', 'main']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1. Checkout source code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2. Setup .NET 8 SDK
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # Step 3. Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore
+
+      # Step 4. Build project
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      # Step 5. Publish (output to /publish folder)
+      - name: Publish application
+        run: dotnet publish --no-build --configuration Release -o ./publish
+
+      # Step 6. Upload published files as artifact
+      - name: Upload publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-api-publish
+          path: ./publish
