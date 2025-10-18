@@ -7,6 +7,7 @@
     <UserSecretsId>450c7fdd-4778-4591-96ed-d44c8a54bd5d</UserSecretsId>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile> 
 	<NoWarn>$(NoWarn);1591</NoWarn>
+	<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
@@ -38,6 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include=".github\workflows\" />
     <Folder Include="Contracts\Validations\" />
   </ItemGroup>
 
