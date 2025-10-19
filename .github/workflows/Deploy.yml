@@ -34,7 +34,7 @@ jobs:
 
       # ✅ Create EF Migration Bundle (.exe to apply migrations)
       - name: Create EF Core Migration Bundle
-        run: dotnet ef migrations bundle --project ./SurveyBasket/SurveyBasket.Api/SurveyBasket.Api.csproj --output ./publish/migrate.exe --runtime win-x64
+        run: dotnet ef migrations bundle --project ./SurveyBasket/SurveyBasket.Api/SurveyBasket.Api.csproj --output ./publish/migrate.exe
 
       - name: Upload publish artifact
         uses: actions/upload-artifact@v4
