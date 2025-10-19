@@ -1,4 +1,4 @@
-name: Build, Publish, and Generate Migration Bundle
+name: Build and Generate Migration Bundle
 
 on: push
 
@@ -15,29 +15,43 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      # 👉 Install EF Core CLI tools
+      # ✅ Install EF tools
       - name: Install EF Core Tools
         run: dotnet tool install --global dotnet-ef
 
       - name: Add EF Tools to PATH
         run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
+      # ✅ Restore & build solution
       - name: Restore dependencies
         run: dotnet restore ./SurveyBasket/SurveyBasket.sln
 
-      - name: Build
-        run: dotnet build ./SurveyBasket/SurveyBasket.sln --no-restore --configuration Release
+      - name: Build solution
+        run: dotnet build ./SurveyBasket/SurveyBasket.sln --configuration Release --no-restore
 
-      # ✅ Publish Web API (normal self-contained deployment)
-      - name: Publish application (self-contained)
-        run: dotnet publish ./SurveyBasket/SurveyBasket.Api/SurveyBasket.Api.csproj --configuration Release -r win-x64 -p:SelfContained=true -o ./publish
+      # ✅ Publish API normally
+      - name: Publish application
+        run: dotnet publish ./SurveyBasket/SurveyBasket.Api/SurveyBasket.Api.csproj \
+             --configuration Release -r win-x64 -p:SelfContained=true -o ./publish/api
 
-      # ✅ Create EF Migration Bundle (.exe to apply migrations)
+      # ✅ Create EF Core Migration Bundle (self-contained EXE for Windows)
       - name: Create EF Core Migration Bundle
-        run: dotnet ef migrations bundle --project ./SurveyBasket/SurveyBasket.Api/SurveyBasket.Api.csproj --output ./publish/migrate.exe
+        run: dotnet ef migrations bundle \
+             --project ./SurveyBasket/SurveyBasket.Api/SurveyBasket.Api.csproj \
+             --output ./publish/migrate/migrate.exe \
+             --self-contained \
+             --runtime win-x64
 
-      - name: Upload publish artifact
+      # ✅ Upload ONLY migrate.exe as artifact (no DLLs)
+      - name: Upload migration bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ef-migration-bundle
+          path: ./publish/migrate/migrate.exe
+
+      # ✅ Upload API (if needed)
+      - name: Upload published API
         uses: actions/upload-artifact@v4
         with:
           name: surveybasket-api
-          path: ./publish
+          path: ./publish/api
