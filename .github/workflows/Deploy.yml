@@ -1,4 +1,4 @@
-name: Build and Publish .NET Web API Artifact
+name: Build, Publish, and Generate Migration Bundle
 
 on: push
 
@@ -15,18 +15,29 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      # 👇 Point restore/build/publish to the solution path
+      # 👉 Install EF Core CLI tools
+      - name: Install EF Core Tools
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Add EF Tools to PATH
+        run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
       - name: Restore dependencies
         run: dotnet restore ./SurveyBasket/SurveyBasket.sln
 
       - name: Build
         run: dotnet build ./SurveyBasket/SurveyBasket.sln --no-restore --configuration Release
 
+      # ✅ Publish Web API (normal self-contained deployment)
       - name: Publish application (self-contained)
         run: dotnet publish ./SurveyBasket/SurveyBasket.Api/SurveyBasket.Api.csproj --configuration Release -r win-x64 -p:SelfContained=true -o ./publish
+
+      # ✅ Create EF Migration Bundle (.exe to apply migrations)
+      - name: Create EF Core Migration Bundle
+        run: dotnet ef migrations bundle --project ./SurveyBasket/SurveyBasket.Api/SurveyBasket.Api.csproj --output ./publish/migrate.exe --runtime win-x64
 
       - name: Upload publish artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dotnet-api-publish
+          name: surveybasket-api
           path: ./publish
