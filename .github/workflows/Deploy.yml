@@ -15,41 +15,32 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      # ✅ Install EF tools
       - name: Install EF Core Tools
         run: dotnet tool install --global dotnet-ef
 
       - name: Add EF Tools to PATH
         run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
-      # ✅ Restore & build solution
       - name: Restore dependencies
         run: dotnet restore ./SurveyBasket/SurveyBasket.sln
 
       - name: Build solution
         run: dotnet build ./SurveyBasket/SurveyBasket.sln --configuration Release --no-restore
 
-      # ✅ Publish API normally
+      # ✅ Single-line publish command
       - name: Publish application
-        run: dotnet publish ./SurveyBasket/SurveyBasket.Api/SurveyBasket.Api.csproj \
-             --configuration Release -r win-x64 -p:SelfContained=true -o ./publish/api
+        run: dotnet publish ./SurveyBasket/SurveyBasket.Api/SurveyBasket.Api.csproj --configuration Release -r win-x64 -p:SelfContained=true -o ./publish/api
 
-      # ✅ Create EF Core Migration Bundle (self-contained EXE for Windows)
+      # ✅ Single-line migration bundle build
       - name: Create EF Core Migration Bundle
-        run: dotnet ef migrations bundle \
-             --project ./SurveyBasket/SurveyBasket.Api/SurveyBasket.Api.csproj \
-             --output ./publish/migrate/migrate.exe \
-             --self-contained \
-             --runtime win-x64
+        run: dotnet ef migrations bundle --project ./SurveyBasket/SurveyBasket.Api/SurveyBasket.Api.csproj --output ./publish/migrate/migrate.exe --self-contained --runtime win-x64
 
-      # ✅ Upload ONLY migrate.exe as artifact (no DLLs)
       - name: Upload migration bundle artifact
         uses: actions/upload-artifact@v4
         with:
           name: ef-migration-bundle
           path: ./publish/migrate/migrate.exe
 
-      # ✅ Upload API (if needed)
       - name: Upload published API
         uses: actions/upload-artifact@v4
         with:
