@@ -46,6 +46,15 @@ if (app.Environment.IsDevelopment())  // it knows that we are in development mod
     });
 }
 
+//  Apply migrations automatically on startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate(); // This will run pending migrations automatically
+}
+
+
+
 
 app.UseSerilogRequestLogging(); // log the info about the http requests and responses
 
